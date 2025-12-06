@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<h4>{{ nuevo|yesno:"Nuevo cliente,Editar cliente" }}</h4>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="id_nombre" class="form-label">Nombre</label>
+    {{ form.nombre }}
+  </div>
+
+  <div class="mb-3">
+    <label for="id_direccion_principal" class="form-label">Dirección principal</label>
+    {{ form.direccion }}
+    <div class="form-text">Solo se muestran las direcciones de este cliente.</div>
+  </div>
+
+  <button type="submit" class="btn btn-danger">Guardar</button>
+  <a href="{% url 'cliente_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+<hr class="my-4">
+
+<div class="accordion" id="addrAccordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMap">
+        Direcciones del cliente y mapa
+      </button>
+    </h2>
+    <div id="collapseMap" class="accordion-collapse collapse" data-bs-parent="#addrAccordion">
+      <div class="accordion-body">
+        <div class="row g-3">
+          <div class="col-12 col-lg-8">
+            <div id="map" style="height: 420px; width: 100%; border-radius: 8px; border: 1px solid #eee;"></div>
+          </div>
+          <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-danger text-white">
+                {% if direccion_principal %}
+                  <strong>Dirección principal</strong>
+                {% else %}
+                  <strong>Nueva dirección</strong>
+                {% endif %}
+              </div>
+              <div class="card-body">
+                <div class="mb-2">
+                  <label class="form-label">Etiqueta</label>
+                  <input type="text" id="labelField" class="form-control" placeholder="Ej. Sede central, Almacén">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Dirección</label>
+                  <input type="text" id="addressField" class="form-control" placeholder="Selecciona en el mapa" readonly>
+                </div>
+                <div class="row">
+                  <div class="col-6 mb-2">
+                    <label class="form-label">Latitud</label>
+                    <input type="text" id="latField" class="form-control" readonly>
+                  </div>
+                  <div class="col-6 mb-2">
+                    <label class="form-label">Longitud</label>
+                    <input type="text" id="lngField" class="form-control" readonly>
+                  </div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-outline-secondary" id="useMyLocationBtn">Usar mi ubicación</button>
+                  <button class="btn btn-danger" id="saveBtn" disabled>Guardar dirección</button>
+                </div>
+                {% if direccion_principal %}
+                  <div class="mt-3">
+                    <button class="btn btn-outline-secondary btn-sm" id="nuevaDireccionBtn">Añadir otra dirección</button>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="card mt-3">
+              <div class="card-header">
+                Direcciones existentes
+              </div>
+              <ul class="list-group list-group-flush" id="addrList">
+                {% for a in direcciones %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>{{ a.label|default:"(sin etiqueta)" }} — {{ a.address }}</span>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary set-principal" data-id="{{ a.id }}">Hacer principal</button>
+                  </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item">Sin direcciones aún</li>
+                {% endfor %}
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% load static %}
+
+<!-- Carga Google Maps -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
+
+<!-- Variables dinámicas -->
+<script>
+  window.CLIENTE_ID = {{ cliente.id|default:"null" }};
+  window.DIRECCION_PRINCIPAL = {
+    lat: {{ direccion_principal.latitude|default:"null" }},
+    lng: {{ direccion_principal.longitude|default:"null" }},
+    address: "{{ direccion_principal.address|escapejs }}"
+  };
+</script>
+
+<!-- Script separado -->
+<script src="{% static 'js/cliente_map.js' %}"></script>
+
+{% endblock %}

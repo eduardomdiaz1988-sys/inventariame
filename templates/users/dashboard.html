@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<div class="row g-3">
+  <div class="col-md-3">
+    <a href="{% url 'cliente_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-people icon"></i>
+        <div>
+          <div class="value">{{ clientes_total }}</div>
+          <div class="label">Clientes</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{% url 'cita_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-calendar-event icon"></i>
+        <div>
+          <div class="value">{{ proximas|length }}</div>
+          <div class="label">Citas próximas</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{% url 'elemento_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-cube icon"></i>
+        <div>
+          <div class="value">{{ elementos_activos }}</div>
+          <div class="label">Elementos activos</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{% url 'cantidad_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-exclamation-circle icon"></i>
+        <div>
+          <div class="value">{{ stock_bajo }}</div>
+          <div class="label">Stock bajo</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-6">
+    <div class="card border-0">
+      <div class="card-header bg-white border-0 px-0"><h5 class="mb-0">Citas próximas</h5></div>
+      <div class="card-body px-0">
+        <table class="table table-sm">
+          <thead><tr><th>Cliente</th><th>Fecha</th><th>Dirección</th></tr></thead>
+          <tbody>
+            {% for c in proximas %}
+            <tr>
+              <td>{{ c.cliente }}</td>
+              <td>{{ c.fecha|date:"d/m/Y H:i" }}</td>
+              <td>{{ c.direccion }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Sin citas en próximos 7 días</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card border-0">
+      <div class="card-header bg-white border-0 px-0"><h5 class="mb-0">Clientes</h5></div>
+      <div class="card-body px-0">
+        <table class="table table-sm">
+          <thead><tr><th>Nombre</th><th class="text-end">Acciones</th></tr></thead>
+          <tbody>
+            {% for obj in clientes %}
+            <tr>
+              <td>{{ obj.nombre }}</td>
+              <td class="text-end">
+                <a href="{% url 'cliente_update' obj.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="{% url 'cliente_delete' obj.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">No hay clientes</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

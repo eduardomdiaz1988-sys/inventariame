@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<h4>Resultados para: "{{ q }}"</h4>
+<div class="row">
+  <div class="col-md-4">
+    <h6>Clientes</h6>
+    <ul class="list-group list-group-flush">
+      {% for c in resultados.clientes %}
+      <li class="list-group-item px-0">{{ c.nombre }}</li>
+      {% empty %}<li class="list-group-item px-0 text-muted">Sin resultados</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="col-md-4">
+    <h6>Ventas</h6>
+    <ul class="list-group list-group-flush">
+      {% for v in resultados.ventas %}
+      <li class="list-group-item px-0">{{ v.referencia }} — {{ v.cliente }}</li>
+      {% empty %}<li class="list-group-item px-0 text-muted">Sin resultados</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="col-md-4">
+    <h6>Elementos</h6>
+    <ul class="list-group list-group-flush">
+      {% for e in resultados.elementos %}
+      <li class="list-group-item px-0">{{ e.nombre }}</li>
+      {% empty %}<li class="list-group-item px-0 text-muted">Sin resultados</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

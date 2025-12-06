@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content_guest %}
+<div class="d-flex justify-content-center">
+  <div class="card shadow-sm" style="max-width: 400px; width: 100%;">
+    <div class="card-header bg-danger text-white text-center">
+      <h5 class="mb-0">Iniciar sesión</h5>
+    </div>
+    <div class="card-body">
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="id_username" class="form-label">Usuario</label>
+          <input type="text" name="username" class="form-control" id="id_username" required>
+        </div>
+        <div class="mb-3">
+          <label for="id_password" class="form-label">Contraseña</label>
+          <input type="password" name="password" class="form-control" id="id_password" required>
+        </div>
+        <div class="d-grid mb-3">
+          <button type="submit" class="btn btn-danger">Entrar</button>
+        </div>
+      </form>
+      <div class="text-center">
+        <small class="text-muted">¿No tienes cuenta?</small><br>
+        <a href="{% url 'registro' %}" class="btn btn-outline-danger btn-sm mt-2">Crear cuenta</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

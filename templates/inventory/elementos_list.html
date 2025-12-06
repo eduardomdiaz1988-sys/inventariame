@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load dict_extras %}
+{% block content_authenticated %}
+<div class="d-flex align-items-center justify-content-between mb-2">
+  <h2 class="mb-0">Mis Elementos</h2>
+  <a class="btn btn-danger" href="{% url 'elemento_create' %}">
+    <i class="bi bi-plus-lg me-1"></i>Nuevo
+  </a>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Estado</th>
+      <th>Tipo Identificador</th>
+      <th>Cantidad</th>
+      <th class="text-end">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for obj in object_list %}
+    <tr>
+      <td>{{ obj.nombre }}</td>
+      <td>{{ obj.estado }}</td>
+      <td>{{ obj.tipo_identificador }}</td>
+      <td>{{ cantidades_dict|get_item:obj.id|default:"0" }}</td>
+      <td class="text-end">
+        <a href="{% url 'elemento_update' obj.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="{% url 'elemento_delete' obj.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No tienes elementos asociados</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<h2>{{ titulo }}</h2>
+<form method="post" class="card p-3 shadow-sm">
+  {% csrf_token %}
+  <p>¿Seguro que quieres eliminar: {{ object }}?</p>
+  <button class="btn btn-danger">Eliminar</button>
+  <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
