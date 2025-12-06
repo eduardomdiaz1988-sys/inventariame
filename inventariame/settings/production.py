@@ -6,7 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY", "inseguro-en-dev")
 DEBUG = False
-ALLOWED_HOSTS = ["inventariame.herokuapp.com"]
+#ALLOWED_HOSTS = ["inventariame.herokuapp.com"]
+ALLOWED_HOSTS = ["inventariame-9bc51caf4b36.herokuapp.com"]
 
 INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
