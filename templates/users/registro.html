@@ -6,9 +6,37 @@
       <h5 class="mb-0">Registro de usuario</h5>
     </div>
     <div class="card-body">
-      <form method="post" id="registroForm">
+
+      <!-- Paso 1: Selección de tipo de usuario -->
+      <form id="tipoUsuarioForm">
+        <div class="mb-3">
+          <label class="form-label">¿Cómo deseas registrarte?</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="tipo_usuario" id="tipoGrupo" value="grupo">
+            <label class="form-check-label" for="tipoGrupo">
+              <strong>Grupo</strong><br>
+              <small class="text-muted">Ideal para gestionar inventarios con otros miembros.</small>
+            </label>
+          </div>
+          <div class="form-check mt-2">
+            <input class="form-check-input" type="radio" name="tipo_usuario" id="tipoIndividual" value="individual">
+            <label class="form-check-label" for="tipoIndividual">
+              <strong>Individual</strong><br>
+              <small class="text-muted">Perfecto para gestionar tu inventario personal.</small>
+            </label>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-danger">Continuar</button>
+        </div>
+      </form>
+
+      <!-- Paso 2: Formulario de registro -->
+      <form method="post" id="registroForm" class="d-none mt-4">
         {% csrf_token %}
+        <input type="hidden" name="tipo_usuario" id="tipoUsuarioSeleccionado">
         {% for field in form %}
+          {% if field.name != "grupo" %}
           <div class="mb-3">
             <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
             {{ field }}
@@ -20,12 +48,14 @@
             {% endfor %}
             <div class="invalid-feedback"></div>
           </div>
+          {% endif %}
         {% endfor %}
         <div class="d-flex justify-content-end gap-2 mt-3">
           <button class="btn btn-danger" type="submit">Registrarse</button>
           <a href="{% url 'login' %}" class="btn btn-secondary">Cancelar</a>
         </div>
       </form>
+
       <div class="text-center mt-3">
         <small class="text-muted">¿Ya tienes cuenta?</small><br>
         <a href="{% url 'login' %}" class="btn btn-outline-danger btn-sm mt-2">Inicia sesión aquí</a>
@@ -36,11 +66,26 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  const tipoForm = document.getElementById("tipoUsuarioForm");
+  const registroForm = document.getElementById("registroForm");
+  const tipoHidden = document.getElementById("tipoUsuarioSeleccionado");
+
+  tipoForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const tipo = document.querySelector('input[name="tipo_usuario"]:checked');
+    if (!tipo) {
+      alert("Por favor selecciona una opción.");
+      return;
+    }
+    tipoHidden.value = tipo.value;
+    tipoForm.classList.add("d-none");
+    registroForm.classList.remove("d-none");
+  });
+
   const usernameInput = document.getElementById("id_username");
   const passwordInput = document.getElementById("id_password1");
 
-  // Verifica si el usuario ya existe (simulado)
-  usernameInput.addEventListener("blur", () => {
+  usernameInput?.addEventListener("blur", () => {
     const username = usernameInput.value.trim();
     if (username.length > 2) {
       fetch(`/verificar-usuario/?username=${username}`)
@@ -58,8 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Verifica fortaleza de contraseña
-  passwordInput.addEventListener("input", () => {
+  passwordInput?.addEventListener("input", () => {
     const value = passwordInput.value;
     const feedback = passwordInput.nextElementSibling;
     const strong = /(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}/.test(value);

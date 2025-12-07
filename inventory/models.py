@@ -1,15 +1,27 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class Elemento(models.Model):
     ESTADOS = [
-        ('ACTIVO', 'Activo'),
-        ('INACTIVO', 'Inactivo'),
-        ('DESCATALOGADO', 'Descatalogado'),
+        ('BUENO', 'Bueno'),
+        ('DEFECTUOSO', 'Defectuoso'),
     ]
+
     nombre = models.CharField(max_length=200)
     estado = models.CharField(max_length=20, choices=ESTADOS)
     tipo_identificador = models.CharField(max_length=50, blank=True)
+
+    # Nuevo campo: referencia al usuario creador
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="elementos",
+        null=True,   # permite datos antiguos sin usuario
+        blank=True
+    )
 
     class Meta:
         verbose_name = "Elemento"

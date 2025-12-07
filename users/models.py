@@ -2,9 +2,21 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 
 class PerfilUsuario(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
-    matricula = models.CharField(max_length=50, unique=True)
-    grupo_django = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True)
+    TIPOS_USUARIO = [
+        ("grupo", "Grupo"),
+        ("individual", "Individual"),
+    ]
+
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name="perfil")
+    tipo_usuario = models.CharField(max_length=10, choices=TIPOS_USUARIO)
+    matricula = models.CharField(max_length=50, blank=True, null=True)
+    nombre_grupo = models.CharField(max_length=100, blank=True, null=True)
+
+    # Relación opcional con el modelo Group de Django
+    grupo_django = models.ForeignKey(Group, on_delete=models.SET_NULL, blank=True, null=True)
+
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} ({self.grupo_django and self.grupo_django.name})"
+        return f"{self.usuario.username} ({self.tipo_usuario})"

@@ -1,32 +1,31 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
-from .models import PerfilUsuario
+from users.models import PerfilUsuario
 
-class RegistroForm(forms.ModelForm):
-    password1 = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
-    password2 = forms.CharField(label="Confirmar contraseña", widget=forms.PasswordInput)
-    matricula = forms.CharField(label="Matrícula")
-    grupo = forms.ModelChoiceField(queryset=Group.objects.all(), label="Grupo")
+class RegistroForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    matricula = forms.CharField(max_length=50, required=False)
+    nombre_grupo = forms.CharField(max_length=100, required=False)
 
     class Meta:
         model = User
-        fields = ["username", "email", "first_name", "last_name"]
+        fields = ["username", "email", "first_name", "last_name", "password1", "password2", "matricula", "nombre_grupo"]
 
-    def clean_password2(self):
-        p1 = self.cleaned_data.get("password1")
-        p2 = self.cleaned_data.get("password2")
-        if p1 and p2 and p1 != p2:
-            raise forms.ValidationError("Las contraseñas no coinciden")
-        return p2
+    def save(self, commit=True, tipo_usuario="individual"):
+        user = super().save(commit=commit)
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        if commit:
-            user.save()
-            PerfilUsuario.objects.create(
-                user=user,
-                matricula=self.cleaned_data["matricula"],
-                grupo_django=self.cleaned_data["grupo"]
-            )
+        # Crear o asignar grupo de Django
+        grupo_obj, _ = Group.objects.get_or_create(name=tipo_usuario.capitalize())
+        user.groups.add(grupo_obj)
+
+        # Crear perfil asociado
+        PerfilUsuario.objects.create(
+            usuario=user,
+            tipo_usuario=tipo_usuario,
+            matricula=self.cleaned_data.get("matricula"),
+            nombre_grupo=self.cleaned_data.get("nombre_grupo"),
+            grupo_django=grupo_obj
+        )
+
         return user
