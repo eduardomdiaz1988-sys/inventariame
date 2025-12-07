@@ -8,7 +8,7 @@ from .base import LOGIN_URL, LOGIN_REDIRECT_URL, LOGOUT_REDIRECT_URL, GOOGLE_MAP
 
 SECRET_KEY = os.getenv("SECRET_KEY", "inseguro-en-dev")
 DEBUG = False
-ALLOWED_HOSTS = ["inventariame-9bc51caf4b36.herokuapp.com"]
+ALLOWED_HOSTS = ["inventariame-9bc51caf4b36.herokuapp.com", "inventariame.herokuapp.com"]
 
 # Añadimos Whitenoise en producción
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
