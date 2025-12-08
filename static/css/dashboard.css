@@ -96,3 +96,79 @@
   transform: scale(1.03);
   background-color: #f8f9fa;
 }
+/* Sidebar base */
+#sidebar {
+  width: 260px;
+  min-height: 100vh;
+  transition: transform 0.3s ease;
+}
+
+/* Sidebar oculto en móviles */
+@media (max-width: 991px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    z-index: 1050;
+    transform: translateX(-100%); /* oculto por defecto */
+  }
+  #sidebar.active {
+    transform: translateX(0); /* visible cuando tiene la clase active */
+  }
+}
+
+/* En pantallas grandes el sidebar siempre visible */
+@media (min-width: 992px) {
+  #sidebar {
+    transform: none !important;
+    position: static;
+  }
+}
+@media (max-width: 991px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    z-index: 1050;
+    transform: translateX(-100%); /* oculto por defecto */
+  }
+  #sidebar.active {
+    transform: translateX(0); /* visible cuando tiene la clase active */
+  }
+}
+/* Overlay para móviles */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 1040; /* justo debajo del sidebar */
+}
+
+@media (max-width: 991px) {
+  #sidebar.active + #sidebar-overlay {
+    display: block;
+  }
+}
+@media (max-width: 576px) {
+  .navbar .d-flex {
+    margin-top: 0.5rem;
+  }
+
+  .navbar form {
+    margin-top: 0.5rem;
+  }
+}
+@media (max-width: 991px) {
+  #darkModeToggleMobile {
+    display: block;
+    width: 100%;
+  }
+}

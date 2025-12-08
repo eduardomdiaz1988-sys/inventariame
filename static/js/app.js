@@ -12,4 +12,3 @@ document.addEventListener("DOMContentLoaded", () => {
     initVoiceSearch(micButton, searchInput);
   }
 });
-

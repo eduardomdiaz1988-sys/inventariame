@@ -1,18 +1,40 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block content_authenticated %}
-
-<h2>{{ titulo }}</h2>
-
-{% include "citas/_cliente_form.html" %}
-{% include "citas/_cita_form.html" %}
-
+<div class="container py-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-danger text-white">
+      <h5 class="mb-0">{{ titulo }}</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% for error in field.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+            <div class="invalid-feedback"></div>
+          </div>
+        {% endfor %}
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button type="submit" class="btn btn-danger">
+            {% if titulo == "Nueva Cita" %}Crear{% else %}Guardar cambios{% endif %}
+          </button>
+          <a href="{% url 'cita_list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-
 <script type="module" src="{% static 'js/citas/cita_form.js' %}"></script>
 {% endblock %}

@@ -9,6 +9,16 @@ class CitaListView(LoginRequiredMixin, ListView):
     model = Cita
     template_name = "citas/citas_list.html"
 
+class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
+    model = Cita
+    fields = ['cliente', 'direccion', 'fecha', 'recordatorio', 'oferta', 'estado']  # añadido estado
+    template_name = "citas/card_form/cita_form.html"
+    success_url = reverse_lazy('cita_list')
+    extra_context = {"titulo": "Nueva Cita"}
+
+    def form_valid(self, form):
+        form.instance.usuario = self.request.user
+        return super().form_valid(form)
 
 class CitaCreateView(LoginRequiredMixin, CreateView):
     model = Cita
@@ -32,6 +42,6 @@ class CitaUpdateView(LoginRequiredMixin, UpdateView):
   
 class CitaDeleteView(LoginRequiredMixin, DeleteView):
     model = Cita
-    template_name = "citas/confirm_delete.html"
+    template_name = "core/confirm_delete.html"
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Eliminar Cita"}

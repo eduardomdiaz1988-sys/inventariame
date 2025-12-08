@@ -2,87 +2,29 @@
 <!DOCTYPE html>
 <html lang="es" data-theme="light">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Inventariame</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
- 
+  {% include "includes/head.html" %}
 </head>
 <body class="d-flex">
 
 {% if request.user.is_authenticated %}
-  <!-- Sidebar -->
-  <aside id="sidebar" class="sidebar bg-danger text-white p-3">
-    <div class="d-flex align-items-center mb-3">
-      <a href="{% url 'home' %}" class="d-flex align-items-center text-white text-decoration-none">
-        <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img me-2 logo-anim">
-        <strong class="d-none d-lg-inline">Inventariame</strong>
-      </a>
-    </div>
-    <div class="sidebar-section text-uppercase small opacity-75 mb-2">Inventario</div>
-    <ul class="nav flex-column mb-3">
-      <li class="nav-item"><a class="nav-link text-white" href="{% url 'elemento_list' %}"><i class="bi bi-box-seam me-2"></i>Elementos</a></li>
-      <li class="nav-item"><a class="nav-link text-white" href="{% url 'stock_list' %}"><i class="bi bi-archive me-2"></i>Stocks</a></li>
-      <li class="nav-item"><a class="nav-link text-white" href="{% url 'cantidad_list' %}"><i class="bi bi-collection me-2"></i>Mi stock</a></li>
-    </ul>
-    <div class="sidebar-section text-uppercase small opacity-75 mb-2">Relaciones</div>
-    <ul class="nav flex-column mb-3">
-      <li class="nav-item"><a class="nav-link text-white" href="{% url 'oferta_list' %}"><i class="bi bi-people me-2"></i>Ofertas</a></li>
-      <li class="nav-item"><a class="nav-link text-white" href="{% url 'cliente_list' %}"><i class="bi bi-people me-2"></i>Clientes</a></li>
-      <li class="nav-item"><a class="nav-link text-white" href="{% url 'cita_list' %}"><i class="bi bi-calendar-event me-2"></i>Citas</a></li>
-      <li class="nav-item"><a class="nav-link text-white" href="{% url 'venta_list' %}"><i class="bi bi-briefcase me-2"></i>Ventas</a></li>
-    </ul>
-    {% if alertas %}
-      <div class="alert alert-light text-danger py-2">
-        <i class="bi bi-bell me-2"></i>{{ alertas }}
-      </div>
-    {% endif %}
-  </aside>
-
-  <!-- Main autenticado -->
+  {% include "includes/sidebar.html" %}
+  {% include "includes/overlay.html" %}
   <main class="flex-grow-1">
-    <nav class="navbar bg-light border-bottom px-3">
-      <button class="btn btn-outline-danger btn-sm me-2 d-lg-none" id="sidebarToggle">
-        <i class="bi bi-list"></i>
-      </button>
-      <form class="d-flex align-items-center gap-2" method="get" action="{% url 'buscar' %}">
-        <input class="form-control form-control-sm" type="search" name="q" id="searchInput" placeholder="Buscar..." value="{{ request.GET.q }}">
-        <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-search"></i></button>
-        <button type="button" class="btn btn-outline-secondary btn-sm" id="micButton" title="Buscar por voz">
-          <i class="bi bi-mic"></i>
-        </button>
-      </form>
-      <div class="ms-auto d-flex align-items-center gap-3">
-        <button class="btn btn-sm btn-outline-secondary" id="darkModeToggle" title="Modo oscuro"><i class="bi bi-moon"></i></button>
-        <span>Bienvenido, <a href="{% url 'perfil' %}">{{ request.user.username }}{% if grupo %} ({{ grupo }}){% endif %}</a></span>
-        <a class="btn btn-danger btn-sm" href="{% url 'logout' %}">Cerrar sesión</a>
-      </div>
-    </nav>
+    {% include "includes/navbar_authenticated.html" %}
     <section class="container py-3">
       {% block content_authenticated %}{% endblock %}
     </section>
   </main>
-
 {% else %}
-  <!-- Main no autenticado -->
   <main class="flex-grow-1 w-100">
-    <nav class="navbar bg-danger px-3">
-      <a href="{% url 'home' %}" class="d-flex align-items-center text-white text-decoration-none">
-        <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img me-2 logo-anim">
-        <strong>Inventariame</strong>
-      </a>
-    </nav>
+    {% include "includes/navbar_guest.html" %}
     <section class="container py-5">
       {% block content_guest %}{% endblock %}
     </section>
   </main>
 {% endif %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'js/app.js' %}"></script>
-
-
+{% include "includes/scripts.html" %}
 {% block scripts %}{% endblock %}
 
 </body>

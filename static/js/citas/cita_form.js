@@ -4,7 +4,6 @@ import { cargarDirecciones } from "./direcciones.js";
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  alert("✅ cita_form.js cargado correctamente");
 
   const clienteSelect = document.getElementById("id_cliente");
   const clienteHidden = document.getElementById("id_cliente_hidden");

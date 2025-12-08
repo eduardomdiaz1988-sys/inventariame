@@ -1,0 +1,25 @@
+{# agenda/templates/agenda/calendar.html #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block content_authenticated %}
+<div class="d-flex gap-2 p-3 bg-light border-bottom">
+  <button id="filtroTodos" class="btn btn-outline-dark btn-sm">Todos</button>
+  <button id="filtroCitas" class="btn btn-outline-danger btn-sm">Citas</button>
+  <button id="filtroVentas" class="btn btn-outline-primary btn-sm">Ventas</button>
+</div>
+
+<div class="container-fluid p-0">
+  <div class="bg-danger text-white px-3 py-2">
+    <h5 class="mb-0">{{ titulo }}</h5>
+  </div>
+  <div id="agendaCalendar" style="min-height: calc(100vh - 56px);"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="{% static 'js/agenda/calendar.js' %}"></script>
+{% endblock %}
+
