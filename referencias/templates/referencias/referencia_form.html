@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+
+<h2>{% if form.instance.pk %}Editar Referencia{% else %}Nueva Referencia{% endif %}</h2>
+
+<form method="post" class="card p-3 shadow-sm">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <button class="btn btn-danger">Guardar</button>
+  <a href="{% url 'referencia_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+{% endblock %}

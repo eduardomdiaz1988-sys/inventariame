@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+ 
 </head>
 <body class="d-flex">
 
@@ -27,6 +28,7 @@
     </ul>
     <div class="sidebar-section text-uppercase small opacity-75 mb-2">Relaciones</div>
     <ul class="nav flex-column mb-3">
+      <li class="nav-item"><a class="nav-link text-white" href="{% url 'oferta_list' %}"><i class="bi bi-people me-2"></i>Ofertas</a></li>
       <li class="nav-item"><a class="nav-link text-white" href="{% url 'cliente_list' %}"><i class="bi bi-people me-2"></i>Clientes</a></li>
       <li class="nav-item"><a class="nav-link text-white" href="{% url 'cita_list' %}"><i class="bi bi-calendar-event me-2"></i>Citas</a></li>
       <li class="nav-item"><a class="nav-link text-white" href="{% url 'venta_list' %}"><i class="bi bi-briefcase me-2"></i>Ventas</a></li>
@@ -53,7 +55,7 @@
       </form>
       <div class="ms-auto d-flex align-items-center gap-3">
         <button class="btn btn-sm btn-outline-secondary" id="darkModeToggle" title="Modo oscuro"><i class="bi bi-moon"></i></button>
-        <span>Bienvenido, {{ request.user.username }}{% if grupo %} ({{ grupo }}){% endif %}</span>
+        <span>Bienvenido, <a href="{% url 'perfil' %}">{{ request.user.username }}{% if grupo %} ({{ grupo }}){% endif %}</a></span>
         <a class="btn btn-danger btn-sm" href="{% url 'logout' %}">Cerrar sesión</a>
       </div>
     </nav>
@@ -80,89 +82,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'js/app.js' %}"></script>
 
-<!-- Búsqueda y comandos por voz -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const micButton = document.getElementById("micButton");
-  const searchInput = document.getElementById("searchInput");
 
-  if ('webkitSpeechRecognition' in window) {
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = "es-ES";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    micButton.addEventListener("click", () => {
-      recognition.start();
-      micButton.classList.add("btn-danger");
-    });
-
-    recognition.onresult = (event) => {
-      let transcript = event.results[0][0].transcript.trim().toLowerCase();
-
-      // Limpieza de caracteres finales
-      if (transcript.endsWith(".")) {
-        transcript = transcript.slice(0, -1);
-      }
-
-      // --- Comandos de navegación ---
-      if (transcript.includes("ir a clientes")) {
-        window.location.href = "{% url 'cliente_list' %}";
-        return;
-      }
-      if (transcript.includes("ir a citas")) {
-        window.location.href = "{% url 'cita_list' %}";
-        return;
-      }
-      if (transcript.includes("ir a ventas")) {
-        window.location.href = "{% url 'venta_list' %}";
-        return;
-      }
-      if (transcript.includes("ir a elementos")) {
-        window.location.href = "{% url 'elemento_list' %}";
-        return;
-      }
-
-      // --- Comando editar <nombre> ---
-      if (transcript.startsWith("editar ")) {
-        const nombreElemento = transcript.replace("editar ", "").trim();
-
-        // Llamada al backend para buscar el elemento por nombre
-        fetch(`/api/elementos/?nombre=${encodeURIComponent(nombreElemento)}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.id) {
-              // Redirige a la página de edición del elemento
-              window.location.href = `/elementos/${data.id}/editar/`;
-            } else {
-              alert(`No se encontró el elemento: ${nombreElemento}`);
-            }
-          })
-          .catch(err => console.error("Error buscando elemento:", err));
-
-        return; // Detenemos aquí para que NO se ejecute la búsqueda normal
-      }
-
-      // --- Si no es comando, lo tratamos como búsqueda ---
-      searchInput.value = transcript;
-      micButton.classList.remove("btn-danger");
-      searchInput.form.submit();
-    };
-
-    recognition.onerror = () => {
-      micButton.classList.remove("btn-danger");
-    };
-
-    recognition.onend = () => {
-      micButton.classList.remove("btn-danger");
-    };
-  } else {
-    micButton.disabled = true;
-    micButton.title = "Tu navegador no soporta búsqueda por voz";
-  }
-});
-</script>
-
+{% block scripts %}{% endblock %}
 
 </body>
 </html>

@@ -12,11 +12,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "users",
+    "referencias",
     "core",
+    "inventory",
     "clientes",
+    "citas",
+    "oferta",
     "sales",
     "voice_search",
-    "inventory",
     "locations",
 ]
 
@@ -71,4 +74,4 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
 
-GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "AIzaSyBjwev8rHoj_tF1k7YCUPp4SRGmno30x_A")

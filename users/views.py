@@ -2,16 +2,21 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from .forms import RegistroForm
 from django.db.models import Q
-from core.models import Cliente, Cita
+from clientes.models import Cliente
+from citas.models import Cita
 from inventory.models import Elemento, Cantidad
 from sales.models import Venta
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from datetime import timedelta
 from django.http import JsonResponse
-from django.contrib.auth.models import User, Group
-from .models import PerfilUsuario
-from users.utils import qs_for_request_user
+from django.contrib.auth.models import User
+from django.shortcuts import render
+
+@login_required
+def perfil_view(request):
+    
+    perfil = request.user.perfil  # gracias al OneToOneField con related_name="perfil"
+    return render(request, "users/perfil.html", {"perfil": perfil})
 
 def registro_view(request):
     if request.method == "POST":
@@ -38,19 +43,11 @@ def logout_view(request):
 
 @login_required
 def home_view(request):
-    perfil = getattr(request.user, "perfil", None)
-
-    if perfil and perfil.tipo_usuario == "grupo":
-        grupo = perfil.grupo_django
-        clientes_qs = Cliente.objects.filter(usuario__groups=grupo)
-        citas_qs = Cita.objects.filter(usuario__groups=grupo, fecha__gte=timezone.now())
-        elementos_qs = Elemento.objects.filter(usuario__groups=grupo, estado="BUENO")
-        stock_qs = Cantidad.objects.filter(usuario__groups=grupo, cantidad__lt=2)
-    else:
-        clientes_qs = Cliente.objects.filter(usuario=request.user)
-        citas_qs = Cita.objects.filter(usuario=request.user, fecha__gte=timezone.now())
-        elementos_qs = Elemento.objects.filter(usuario=request.user, estado="BUENO")
-        stock_qs = Cantidad.objects.filter(usuario=request.user, cantidad__lt=2)
+    # Filtrar todo por el usuario actual
+    clientes_qs = Cliente.objects.filter(usuario=request.user)
+    citas_qs = Cita.objects.filter(usuario=request.user, fecha__gte=timezone.now())
+    elementos_qs = Elemento.objects.filter(usuario=request.user, estado="BUENO")
+    stock_qs = Cantidad.objects.filter(usuario=request.user, cantidad__lt=2)
 
     context = {
         "clientes_total": clientes_qs.count(),

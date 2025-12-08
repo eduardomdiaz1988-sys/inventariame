@@ -1,6 +1,6 @@
 from django.utils import timezone
 from datetime import timedelta
-from core.models import Cita
+from citas.models import Cita
 
 def alertas_processor(request):
     if not request.user.is_authenticated:

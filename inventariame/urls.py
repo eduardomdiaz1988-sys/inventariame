@@ -27,4 +27,8 @@ urlpatterns = [
     path('inventory/', include('inventory.urls')),  # elementos, stocks, cantidades
     path('locations/', include('locations.urls')),  # direcciones
     path('buscar/', buscar_view, name='buscar'),  # buscador
+    path("referencias/", include("referencias.urls")),
+    path("ofertas/", include("oferta.urls")),
+    path("citas/", include("citas.urls")),
+
 ]

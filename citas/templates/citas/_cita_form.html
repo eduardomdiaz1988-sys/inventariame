@@ -1,0 +1,42 @@
+{% extends "citas/_card.html" %}
+
+{% block card_id %}card-cita{% endblock %}
+{% block card_title %}Paso 2: Crear Cita{% endblock %}
+{% block hidden %}d-none{% endblock %}
+
+{% block card_content %}
+  <form method="post" action="{% url 'cita_create' %}" class="p-2">
+    {% csrf_token %}
+    <input type="hidden" id="id_cliente_hidden" name="cliente">
+
+    <div class="mb-3">
+      {{ form.direccion.label_tag }}
+      <select id="id_direccion" name="direccion" class="form-control">
+        <option value="">--- Selecciona cliente primero ---</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      {{ form.fecha.label_tag }}
+      {{ form.fecha }}
+    </div>
+
+    <div class="form-check mb-3">
+      {{ form.recordatorio }}
+      {{ form.recordatorio.label_tag }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.oferta.label_tag }}
+      {{ form.oferta }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.estado.label_tag }}
+      {{ form.estado }}
+    </div>
+
+    <button class="btn btn-danger">Guardar Cita</button>
+    <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
+  </form>
+{% endblock %}

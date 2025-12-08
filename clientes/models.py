@@ -4,6 +4,7 @@ from locations.models import Address
 
 class Cliente(models.Model):
     nombre = models.CharField(max_length=200)
+    telefono = models.CharField(max_length=20, blank=True, null=True)  # NUEVO CAMPO
     direccion = models.ForeignKey(
         Address,
         on_delete=models.SET_NULL,
@@ -24,4 +25,4 @@ class Cliente(models.Model):
         verbose_name_plural = "Clientes"
 
     def __str__(self):
-        return self.nombre
+        return f"{self.nombre} ({self.telefono or 'sin teléfono'})"

@@ -1,19 +1,15 @@
-// Toggle de modo oscuro
-(function() {
-  const root = document.documentElement;
-  const key = 'inventariame_theme';
-  const saved = localStorage.getItem(key);
-  if (saved) root.setAttribute('data-theme', saved);
+import { initSidebarToggle } from "./sidebar.js";
+import { initDarkModeToggle } from "./darkmode.js";
+import { initVoiceSearch } from "./voice_search.js";
 
-  document.getElementById('darkModeToggle')?.addEventListener('click', () => {
-    const current = root.getAttribute('data-theme') || 'light';
-    const next = current === 'light' ? 'dark' : 'light';
-    root.setAttribute('data-theme', next);
-    localStorage.setItem(key, next);
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  initSidebarToggle();
+  initDarkModeToggle();
 
-  document.getElementById("sidebarToggle")?.addEventListener("click", () => {
-    document.getElementById("sidebar")?.classList.toggle("active");
-  });
+  const micButton = document.getElementById("micButton");
+  const searchInput = document.getElementById("searchInput");
+  if (micButton && searchInput) {
+    initVoiceSearch(micButton, searchInput);
+  }
+});
 
-})();

@@ -1,0 +1,38 @@
+{% extends "citas/_card.html" %}
+
+{% block card_id %}card-cliente{% endblock %}
+{% block card_title %}Paso 1: Seleccionar Cliente{% endblock %}
+
+{% block card_content %}
+  <div class="mb-3">
+    {{ form.cliente.label_tag }}
+    {{ form.cliente }}
+    <div class="form-text">Selecciona un cliente ya existente.</div>
+  </div>
+
+  <div class="accordion" id="accordionNuevoCliente">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingNuevoCliente">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNuevoCliente">
+          Crear nuevo cliente
+        </button>
+      </h2>
+      <div id="collapseNuevoCliente" class="accordion-collapse collapse" data-bs-parent="#accordionNuevoCliente">
+        <div class="accordion-body">
+          <form id="clienteForm">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="id_nombre">Nombre</label>
+              <input type="text" id="id_nombre" name="nombre" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="id_telefono">Teléfono</label>
+              <input type="text" id="id_telefono" name="telefono" class="form-control" placeholder="Ej. 600123456">
+            </div>
+            <button type="button" id="btnCrearCliente" class="btn btn-danger">Guardar nuevo cliente</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

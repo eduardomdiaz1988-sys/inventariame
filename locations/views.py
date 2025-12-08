@@ -9,6 +9,13 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from .models import Address
 
+
+
+def direcciones_por_cliente(request, cliente_id):
+    direcciones = Address.objects.filter(cliente_id=cliente_id).values("id", "address", "label")
+    # devolvemos id + texto de la dirección (y opcionalmente el label)
+    return JsonResponse(list(direcciones), safe=False)
+
 @login_required
 def map_view(request):
     return render(request, "location/map.html", {

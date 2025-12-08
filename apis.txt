@@ -1,3 +1,6 @@
 # settings.py
 GOOGLE_MAPS_API_KEY = "AIzaSyBjwev8rHoj_tF1k7YCUPp4SRGmno30x_A"
   SECRET_KEY = "Yx1hyWOrvC8JuYXoe6atFaYq08EH2TsnIPNeHaxSDjcyOAZINpDVOfRuJZLEk9VAcBU"
+
+
+  heroku config:set SECRET_KEY=Yx1hyWOrvC8JuYXoe6atFaYq08EH2TsnIPNeHaxSDjcyOAZINpDVOfRuJZLEk9VAcBU --app inventariame

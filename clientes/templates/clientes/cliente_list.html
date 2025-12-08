@@ -1,20 +1,37 @@
 {% extends "base.html" %}
 {% block content_authenticated %}
-<h4>Clientes</h4>
+<h4>Mis Clientes</h4>
 <a href="{% url 'cliente_nuevo' %}" class="btn btn-danger btn-sm mb-3">Nuevo cliente</a>
-<table class="table table-bordered">
-  <thead>
-    <tr><th>Nombre</th><th>Dirección</th><th>Acciones</th></tr>
+
+<table class="table table-bordered table-striped">
+  <thead class="table-light">
+    <tr>
+      <th>Nombre</th>
+      <th>Teléfono</th>
+      <th>Dirección principal</th>
+      <th class="text-end">Acciones</th>
+    </tr>
   </thead>
   <tbody>
     {% for cliente in clientes %}
     <tr>
       <td>{{ cliente.nombre }}</td>
-      <td>{{ cliente.direccion }}</td>
+      <td>{{ cliente.telefono|default:"-" }}</td>
       <td>
+        {% if cliente.direccion %}
+          {{ cliente.direccion.label|default:"(sin etiqueta)" }} — {{ cliente.direccion.address }}
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td class="text-end">
         <a href="{% url 'cliente_update' cliente.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
         <a href="{% url 'cliente_delete' cliente.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
       </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="4" class="text-center">Sin clientes aún</td>
     </tr>
     {% endfor %}
   </tbody>

@@ -5,8 +5,12 @@ from locations.models import Address
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
-        fields = ["nombre", "direccion"]
+        fields = ["nombre", "telefono", "direccion"]  # añadimos telefono
         widgets = {
+            "telefono": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Introduce el teléfono"
+            }),
             "direccion": forms.Select(attrs={"class": "form-select"})
         }
 

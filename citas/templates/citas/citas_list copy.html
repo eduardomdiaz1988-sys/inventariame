@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<div class="d-flex align-items-center justify-content-between mb-2">
+  <h2 class="mb-0">Citas</h2>
+  <a class="btn btn-danger" href="{% url 'cita_create' %}">
+    <i class="bi bi-plus-lg me-1"></i>Nueva
+  </a>
+</div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Cliente</th>
+      <th>Fecha</th>
+      <th>Recordatorio</th>
+      <th>Oferta</th>
+      <th>Estado</th>
+      <th class="text-end">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for obj in object_list %}
+    <tr>
+      <td>{{ obj.cliente }}</td>
+      <td>{{ obj.fecha|date:"Y-m-d H:i" }}</td>
+      <td>{{ obj.recordatorio|yesno:"Sí,No" }}</td>
+      <td>
+        {% if obj.oferta %}
+          {{ obj.oferta.nombre }} ({{ obj.oferta.valor }})
+        {% else %}
+          -
+        {% endif %}
+      </td>
+     <td>
+        {% if obj.estado %}
+          {{ obj.estado }} 
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td class="text-end">
+        <a href="{% url 'cita_update' obj.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="{% url 'cita_delete' obj.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="7">Sin registros</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

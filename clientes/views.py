@@ -4,13 +4,38 @@ from .models import Cliente
 from .forms import ClienteForm
 from locations.models import Address
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+
+# --- AJAX para crear cliente ---
+@csrf_exempt
+@login_required
+def cliente_create_ajax(request):
+    if request.method == "POST":
+        nombre = request.POST.get("nombre")
+        telefono = request.POST.get("telefono")
+
+        cliente = Cliente.objects.create(
+            nombre=nombre,
+            telefono=telefono,
+            usuario=request.user
+        )
+
+        # obtenemos dirección principal si existe
+        direccion = cliente.direccion.address if cliente.direccion else "Sin dirección definida"
+
+        return JsonResponse({
+            "id": cliente.id,
+            "nombre": cliente.nombre,
+            "telefono": cliente.telefono,
+            "direccion": direccion
+        })
+    return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
-
-
+# --- AJAX para marcar dirección principal ---
 @login_required
 @require_POST
 def set_principal(request, pk):
@@ -37,18 +62,23 @@ def set_principal(request, pk):
         return JsonResponse({"error": "Cliente no encontrado"}, status=404)
     except Address.DoesNotExist:
         return JsonResponse({"error": "Dirección no encontrada"}, status=404)
-    
+
+
+# --- Listado de clientes ---
 @login_required
 def cliente_list(request):
     clientes = Cliente.objects.all()
     return render(request, "clientes/cliente_list.html", {"clientes": clientes})
 
+
+# --- Crear cliente ---
 @login_required
 def cliente_nuevo(request):
     cliente = None
     form = ClienteForm(request.POST or None, cliente=cliente)
     if form.is_valid():
         cliente = form.save(commit=False)
+        cliente.usuario = request.user
         cliente.save()
         return redirect("cliente_update", pk=cliente.pk)
     return render(request, "clientes/cliente_form.html", {
@@ -59,15 +89,22 @@ def cliente_nuevo(request):
         "nuevo": True
     })
 
+
+# --- Editar cliente ---
 @login_required
 def cliente_editar(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     direcciones = Address.objects.filter(cliente=cliente)
     direccion_principal = cliente.direccion
     form = ClienteForm(request.POST or None, instance=cliente, cliente=cliente)
+
+    if cliente.usuario != request.user:
+        return HttpResponseForbidden("No tienes permiso para editar este cliente.")
+
     if form.is_valid():
         form.save()
         return redirect("cliente_list")
+
     return render(request, "clientes/cliente_form.html", {
         "form": form,
         "cliente": cliente,
@@ -77,6 +114,8 @@ def cliente_editar(request, pk):
         "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY
     })
 
+
+# --- Eliminar cliente ---
 @login_required
 def cliente_eliminar(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)

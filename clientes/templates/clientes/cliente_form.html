@@ -10,6 +10,12 @@
   </div>
 
   <div class="mb-3">
+    <label for="id_telefono" class="form-label">Teléfono</label>
+    {{ form.telefono }}
+    <div class="form-text">Introduce un número de contacto.</div>
+  </div>
+
+  <div class="mb-3">
     <label for="id_direccion_principal" class="form-label">Dirección principal</label>
     {{ form.direccion }}
     <div class="form-text">Solo se muestran las direcciones de este cliente.</div>
@@ -98,7 +104,6 @@
     </div>
   </div>
 </div>
-
 
 {% load static %}
 
