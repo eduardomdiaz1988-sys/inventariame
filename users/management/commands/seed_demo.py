@@ -62,15 +62,15 @@ class Command(BaseCommand):
         ensure_profile(user2, grupo_group, "Grupo", "Operaciones")
 
         # --- Tipos y referencias ---
-        tipo_servicio, _ = Tipo.objects.get_or_create(nombre="Servicio")
-        tipo_producto, _ = Tipo.objects.get_or_create(nombre="Producto")
+        tipo_servicio, _ = Tipo.objects.get_or_create(nombre="Fast")
+        tipo_producto, _ = Tipo.objects.get_or_create(nombre="Moonshot")
 
-        ref1, _ = Referencia.objects.get_or_create(nombre="Panel Solar", tipo=tipo_producto)
-        ref2, _ = Referencia.objects.get_or_create(nombre="Mantenimiento anual", tipo=tipo_servicio)
+        ref1, _ = Referencia.objects.get_or_create(nombre="PX3MX", tipo=tipo_producto)
+        ref2, _ = Referencia.objects.get_or_create(nombre="F210SP", tipo=tipo_servicio)
 
         # --- Ofertas ---
-        oferta1, _ = Oferta.objects.get_or_create(nombre="Oferta Solar Básica", referencia=ref1, tipo=tipo_producto, valor="10%")
-        oferta2, _ = Oferta.objects.get_or_create(nombre="Pack Mantenimiento", referencia=ref2, tipo=tipo_servicio, valor="Gratis primer año")
+        oferta1, _ = Oferta.objects.get_or_create(nombre="Pack de 3 Sensores Magneticos", referencia=ref1, tipo=tipo_producto, valor="0 + 7")
+        oferta2, _ = Oferta.objects.get_or_create(nombre="Pack Fast4 + Videocamara Arlo", referencia=ref2, tipo=tipo_servicio, valor="0 + 7")
 
         # --- Clientes ---
         cliente1, _ = Cliente.objects.get_or_create(nombre="Cliente Uno", telefono="600111222", usuario=user1)

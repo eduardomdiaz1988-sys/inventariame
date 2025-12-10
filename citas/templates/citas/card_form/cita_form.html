@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 {% load static %}
-{% block content_authenticated %}
 
+{% block content_authenticated %}
 <h2>{{ titulo }}</h2>
 
 {% include "citas/card_form/_cliente_form.html" %}
 {% include "citas/card_form/_cita_form.html" %}
-
+{% include "citas/card_form/_resumen_form.html" %}
 {% endblock %}
 
 {% block scripts %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-
 <script type="module" src="{% static 'js/citas/cita_form.js' %}"></script>
 {% endblock %}

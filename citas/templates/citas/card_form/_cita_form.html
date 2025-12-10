@@ -1,42 +1,63 @@
 {% extends "citas/card_form/_card.html" %}
+{% load widget_tweaks %}
 
 {% block card_id %}card-cita{% endblock %}
 {% block card_title %}Paso 2: Crear Cita{% endblock %}
 {% block hidden %}d-none{% endblock %}
 
 {% block card_content %}
-  <form method="post" action="{% url 'cita_create' %}" class="p-2">
+  <form id="citaFormFinal" method="post" action="{% url 'cita_create_card' %}" class="p-2">
     {% csrf_token %}
+
+    <!-- Errores del formulario -->
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <!-- Cliente existente/nuevo -->
     <input type="hidden" id="id_cliente_hidden" name="cliente">
 
-    <div class="mb-3">
-      {{ form.direccion.label_tag }}
-      <select id="id_direccion" name="direccion" class="form-control">
-        <option value="">--- Selecciona cliente primero ---</option>
-      </select>
-    </div>
+    <!-- Campos ocultos para cliente nuevo -->
+    <input type="hidden" id="id_nombre_hidden" name="nombre">
+    <input type="hidden" id="id_telefono_hidden" name="telefono">
+    <input type="hidden" id="id_address_hidden" name="address">
+    <input type="hidden" id="id_lat_hidden" name="latitude">
+    <input type="hidden" id="id_lng_hidden" name="longitude">
+    <input type="hidden" id="id_label_hidden" name="label">
 
     <div class="mb-3">
       {{ form.fecha.label_tag }}
-      {{ form.fecha }}
+      {{ form.fecha|add_class:"form-control" }}
+      {% if form.fecha.errors %}
+        <div class="text-danger small">{{ form.fecha.errors }}</div>
+      {% endif %}
     </div>
 
     <div class="form-check mb-3">
       {{ form.recordatorio }}
       {{ form.recordatorio.label_tag }}
+      {% if form.recordatorio.errors %}
+        <div class="text-danger small">{{ form.recordatorio.errors }}</div>
+      {% endif %}
     </div>
 
     <div class="mb-3">
       {{ form.oferta.label_tag }}
       {{ form.oferta }}
+      {% if form.oferta.errors %}
+        <div class="text-danger small">{{ form.oferta.errors }}</div>
+      {% endif %}
     </div>
 
     <div class="mb-3">
       {{ form.estado.label_tag }}
       {{ form.estado }}
+      {% if form.estado.errors %}
+        <div class="text-danger small">{{ form.estado.errors }}</div>
+      {% endif %}
     </div>
 
-    <button class="btn btn-danger">Guardar Cita</button>
+    <button type="button" id="btnResumen" class="btn btn-danger">Continuar al resumen</button>
     <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
   </form>
 {% endblock %}

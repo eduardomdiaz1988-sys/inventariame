@@ -8,32 +8,67 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
+from django.db.models import Q
+from locations.models import Address
 
-# --- AJAX para crear cliente ---
-@csrf_exempt
+@require_GET
+def buscar_cliente(request):
+    q = request.GET.get("q", "").strip()
+    resultados = []
+
+    if q:
+        clientes = Cliente.objects.filter(
+            Q(nombre__icontains=q) | Q(telefono__icontains=q)
+        )[:10]  # limita a 10 resultados
+        resultados = [
+            {"id": c.id, "nombre": c.nombre, "telefono": c.telefono}
+            for c in clientes
+        ]
+
+    return JsonResponse(resultados, safe=False)
+
 @login_required
+@require_POST
 def cliente_create_ajax(request):
-    if request.method == "POST":
-        nombre = request.POST.get("nombre")
-        telefono = request.POST.get("telefono")
+    nombre = request.POST.get("nombre", "").strip()
+    telefono = request.POST.get("telefono", "").strip()
+    address = request.POST.get("address", "").strip()
+    latitude = request.POST.get("latitude")
+    longitude = request.POST.get("longitude")
+    label = request.POST.get("label", "").strip()
 
-        cliente = Cliente.objects.create(
-            nombre=nombre,
-            telefono=telefono,
-            usuario=request.user
+    if not nombre:
+        return JsonResponse({"error": "El nombre es obligatorio"}, status=400)
+
+    # Crear cliente
+    cliente = Cliente.objects.create(
+        nombre=nombre,
+        telefono=telefono if telefono else None,
+        usuario=request.user
+    )
+
+    # Crear dirección principal si se proporcionan datos
+    direccion_obj = None
+    if address and latitude and longitude:
+        direccion_obj = Address.objects.create(
+            cliente=cliente,
+            address=address,
+            latitude=latitude,
+            longitude=longitude,
+            label=label if label else None,
+            principal=True
         )
 
-        # obtenemos dirección principal si existe
-        direccion = cliente.direccion.address if cliente.direccion else "Sin dirección definida"
-
-        return JsonResponse({
-            "id": cliente.id,
-            "nombre": cliente.nombre,
-            "telefono": cliente.telefono,
-            "direccion": direccion
-        })
-    return JsonResponse({"error": "Método no permitido"}, status=405)
-
+    return JsonResponse({
+        "id": cliente.id,
+        "nombre": cliente.nombre,
+        "telefono": cliente.telefono,
+        "direccion": direccion_obj.address if direccion_obj else "Sin dirección definida",
+        "lat": direccion_obj.latitude if direccion_obj else None,
+        "lng": direccion_obj.longitude if direccion_obj else None,
+        "label": direccion_obj.label if direccion_obj else None
+    })
 
 # --- AJAX para marcar dirección principal ---
 @login_required

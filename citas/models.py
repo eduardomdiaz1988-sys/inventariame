@@ -13,7 +13,6 @@ class Cita(models.Model):
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='citas')
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='citas')
-    direccion = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True, related_name='citas')
     fecha = models.DateTimeField()
     recordatorio = models.BooleanField(default=False)
     venta = models.ForeignKey(Venta, on_delete=models.SET_NULL, null=True, blank=True, related_name='citas')

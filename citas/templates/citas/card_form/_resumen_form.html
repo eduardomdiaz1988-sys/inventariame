@@ -1,0 +1,21 @@
+{% extends "citas/card_form/_card.html" %}
+
+{% block card_id %}card-resumen{% endblock %}
+{% block card_title %}Paso 3: Resumen de la cita{% endblock %}
+{% block hidden %}d-none{% endblock %}
+
+{% block card_content %}
+  <div class="p-2">
+    <ul class="list-group mb-3">
+      <li class="list-group-item"><strong>Cliente:</strong> <span id="resCliente"></span></li>
+      <li class="list-group-item"><strong>Teléfono:</strong> <span id="resTelefono"></span></li>
+      <li class="list-group-item"><strong>Dirección:</strong> <span id="resDireccion"></span></li>
+      <li class="list-group-item"><strong>Fecha:</strong> <span id="resFecha"></span></li>
+      <li class="list-group-item"><strong>Estado:</strong> <span id="resEstado"></span></li>
+      <li class="list-group-item"><strong>Oferta:</strong> <span id="resOferta"></span></li>
+      <li class="list-group-item"><strong>Recordatorio:</strong> <span id="resRecordatorio"></span></li>
+    </ul>
+    <button type="submit" form="citaFormFinal" class="btn btn-success">Guardar cita</button>
+    <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
+  </div>
+{% endblock %}

@@ -4,20 +4,37 @@
 {% block card_title %}Paso 1: Seleccionar Cliente{% endblock %}
 
 {% block card_content %}
+  <!-- Selector inicial -->
   <div class="mb-3">
-    {{ form.cliente.label_tag }}
-    {{ form.cliente }}
-    <div class="form-text">Selecciona un cliente ya existente.</div>
+    <label class="form-label">¿Es un cliente existente?</label>
+    <div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="cliente_tipo" id="cliente_existente" value="existente" checked>
+        <label class="form-check-label" for="cliente_existente">Sí</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="cliente_tipo" id="cliente_nuevo" value="nuevo">
+        <label class="form-check-label" for="cliente_nuevo">No</label>
+      </div>
+    </div>
   </div>
 
-  <div class="accordion" id="accordionNuevoCliente">
+  <!-- Buscador AJAX de cliente existente -->
+  <div id="busquedaCliente" class="mb-3">
+    <label for="buscador_cliente" class="form-label">Buscar cliente</label>
+    <input type="text" id="buscador_cliente" class="form-control" placeholder="Escribe nombre o teléfono">
+    <div id="resultados_cliente" class="list-group mt-2"></div>
+  </div>
+
+  <!-- Formulario de nuevo cliente con mapa -->
+  <div id="formNuevoCliente" class="accordion mt-3 d-none">
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingNuevoCliente">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNuevoCliente">
           Crear nuevo cliente
         </button>
       </h2>
-      <div id="collapseNuevoCliente" class="accordion-collapse collapse" data-bs-parent="#accordionNuevoCliente">
+      <div id="collapseNuevoCliente" class="accordion-collapse collapse" data-bs-parent="#formNuevoCliente">
         <div class="accordion-body">
           <form id="clienteForm">
             {% csrf_token %}
@@ -29,10 +46,64 @@
               <label for="id_telefono">Teléfono</label>
               <input type="text" id="id_telefono" name="telefono" class="form-control" placeholder="Ej. 600123456">
             </div>
-            <button type="button" id="btnCrearCliente" class="btn btn-danger">Guardar nuevo cliente</button>
+
+            <!-- Bloque de dirección con mapa -->
+            <div class="row g-3">
+              <div class="col-12 col-lg-8">
+                <div id="map" style="height: 300px; width: 100%; border-radius: 8px; border: 1px solid #eee;"></div>
+              </div>
+              <div class="col-12 col-lg-4">
+                <div class="card shadow-sm">
+                  <div class="card-header bg-danger text-white">
+                    <strong>Dirección del cliente</strong>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-2">
+                      <label class="form-label">Etiqueta</label>
+                      <input type="text" id="labelField" name="label" class="form-control" placeholder="Ej. Casa, Almacén">
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label">Dirección</label>
+                      <input type="text" id="addressField" name="address" class="form-control" placeholder="Selecciona en el mapa" readonly>
+                    </div>
+                    <div class="row">
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Latitud</label>
+                        <input type="text" id="latField" name="latitude" class="form-control" readonly>
+                      </div>
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Longitud</label>
+                        <input type="text" id="lngField" name="longitude" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-outline-secondary" type="button" id="useMyLocationBtn">Usar mi ubicación</button>
+                    </div>
+                    <div class="form-text mt-2">Pulsa en el mapa para seleccionar un punto.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" id="btnCrearCliente" class="btn btn-danger mt-3">Guardar nuevo cliente</button>
           </form>
         </div>
       </div>
     </div>
   </div>
+
+{% load static %}
+<script>
+  window.CLIENTE_ID = {{ cliente.id|default:"null" }};
+  window.DIRECCION_PRINCIPAL = {
+    lat: {{ direccion_principal.latitude|default:"null" }},
+    lng: {{ direccion_principal.longitude|default:"null" }},
+    address: "{{ direccion_principal.address|escapejs }}"
+  };
+</script>
+
+{% block scripts %}
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
+  <script type="module" src="{% static 'js/map/map.js' %}"></script>
+{% endblock %}
 {% endblock %}
