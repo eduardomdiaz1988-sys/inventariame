@@ -14,6 +14,7 @@ class CitaWithClientForm(forms.ModelForm):
 
     class Meta:
         model = Cita
+        exclude = ["cliente", "usuario"]
         fields = ["cliente", "fecha", "recordatorio", "oferta", "estado"]
         widgets = {
             "cliente": forms.HiddenInput(),  # lo rellena el JS en la vista completa

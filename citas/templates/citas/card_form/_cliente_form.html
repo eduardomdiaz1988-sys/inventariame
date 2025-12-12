@@ -1,4 +1,5 @@
 {% extends "citas/card_form/_card.html" %}
+{% load static %}
 
 {% block card_id %}card-cliente{% endblock %}
 {% block card_title %}Paso 1: Seleccionar Cliente{% endblock %}
@@ -85,25 +86,13 @@
               </div>
             </div>
 
-            <button type="button" id="btnCrearCliente" class="btn btn-danger mt-3">Guardar nuevo cliente</button>
+            <!-- Botón que solo copia datos y avanza -->
+            <button type="button" id="btnCrearCliente" class="btn btn-danger mt-3">Continuar con este cliente</button>
           </form>
         </div>
       </div>
     </div>
   </div>
-
-{% load static %}
-<script>
-  window.CLIENTE_ID = {{ cliente.id|default:"null" }};
-  window.DIRECCION_PRINCIPAL = {
-    lat: {{ direccion_principal.latitude|default:"null" }},
-    lng: {{ direccion_principal.longitude|default:"null" }},
-    address: "{{ direccion_principal.address|escapejs }}"
-  };
-</script>
-
-{% block scripts %}
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
-  <script type="module" src="{% static 'js/map/map.js' %}"></script>
 {% endblock %}
-{% endblock %}
+
+

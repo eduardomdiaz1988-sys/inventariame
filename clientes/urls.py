@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import cliente_list, buscar_cliente,cliente_nuevo, cliente_editar,cliente_eliminar,set_principal,cliente_create_ajax
+from .views import cliente_list, buscar_cliente,cliente_nuevo, cliente_editar,cliente_eliminar,set_principal
 
 urlpatterns = [
     path("", cliente_list, name="cliente_list"),
@@ -8,6 +8,6 @@ urlpatterns = [
     path("<int:pk>/eliminar/", cliente_eliminar, name="cliente_delete"),
     # Opcional: endpoint para setear principal vía AJAX
     path("<int:pk>/direccion-principal/", set_principal, name="clientes_set_principal"),
-    path("create-ajax/", cliente_create_ajax, name="cliente_create_ajax"),
+
     path("api/buscar/", buscar_cliente, name="cliente_buscar"),
 ]

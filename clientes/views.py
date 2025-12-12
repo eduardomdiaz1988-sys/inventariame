@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Cliente
-from .forms import ClienteForm
+from .forms import ClienteForm, CitaWithClientForm
 from locations.models import Address
 import json
 from django.http import JsonResponse, HttpResponseForbidden
@@ -28,47 +28,6 @@ def buscar_cliente(request):
 
     return JsonResponse(resultados, safe=False)
 
-@login_required
-@require_POST
-def cliente_create_ajax(request):
-    nombre = request.POST.get("nombre", "").strip()
-    telefono = request.POST.get("telefono", "").strip()
-    address = request.POST.get("address", "").strip()
-    latitude = request.POST.get("latitude")
-    longitude = request.POST.get("longitude")
-    label = request.POST.get("label", "").strip()
-
-    if not nombre:
-        return JsonResponse({"error": "El nombre es obligatorio"}, status=400)
-
-    # Crear cliente
-    cliente = Cliente.objects.create(
-        nombre=nombre,
-        telefono=telefono if telefono else None,
-        usuario=request.user
-    )
-
-    # Crear dirección principal si se proporcionan datos
-    direccion_obj = None
-    if address and latitude and longitude:
-        direccion_obj = Address.objects.create(
-            cliente=cliente,
-            address=address,
-            latitude=latitude,
-            longitude=longitude,
-            label=label if label else None,
-            principal=True
-        )
-
-    return JsonResponse({
-        "id": cliente.id,
-        "nombre": cliente.nombre,
-        "telefono": cliente.telefono,
-        "direccion": direccion_obj.address if direccion_obj else "Sin dirección definida",
-        "lat": direccion_obj.latitude if direccion_obj else None,
-        "lng": direccion_obj.longitude if direccion_obj else None,
-        "label": direccion_obj.label if direccion_obj else None
-    })
 
 # --- AJAX para marcar dirección principal ---
 @login_required

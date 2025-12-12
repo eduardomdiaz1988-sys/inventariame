@@ -20,41 +20,71 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Nueva Cita"}
 
+    def form_invalid(self, form):
+        print("Errores en el formulario:", form.errors)
+        return super().form_invalid(form)
+
+    def post(self, request, *args, **kwargs):
+        print("POST recibido:", request.POST)
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
         """
-        Si el cliente es nuevo, lo creamos junto con su dirección principal
-        antes de guardar la cita.
+        Flujo:
+        1. Crear cliente nuevo (si corresponde) o recuperar existente.
+        2. Crear dirección principal opcional.
+        3. Asignar cliente y usuario a la cita.
+        4. Guardar la cita.
         """
         cliente_id = self.request.POST.get("cliente")
-        nombre = self.request.POST.get("nombre")
-        telefono = self.request.POST.get("telefono")
-        address = self.request.POST.get("address")
+        nombre = self.request.POST.get("nombre", "").strip()
+        telefono = self.request.POST.get("telefono", "").strip()
+        address = self.request.POST.get("address", "").strip()
         latitude = self.request.POST.get("latitude")
         longitude = self.request.POST.get("longitude")
-        label = self.request.POST.get("label")
+        label = self.request.POST.get("label", "").strip()
 
-        # Si no hay cliente_id pero sí datos de cliente nuevo → creamos cliente
+        cliente = None
+
+        # Caso: cliente nuevo
         if not cliente_id and nombre:
             cliente = Cliente.objects.create(
                 nombre=nombre,
-                telefono=telefono,
+                telefono=telefono if telefono else None,
                 usuario=self.request.user
             )
-            if address and latitude and longitude:
-                Address.objects.create(
-                    cliente=cliente,
-                    address=address,
-                    latitude=latitude,
-                    longitude=longitude,
-                    label=label if label else None,
-                    principal=True
-                )
-            form.instance.cliente = cliente
-        else:
-            # cliente existente
-            form.instance.cliente_id = cliente_id
 
+            # Dirección principal opcional
+            if address and latitude and longitude:
+                try:
+                    direccion_obj = Address.objects.create(
+                        user=self.request.user,
+                        cliente=cliente,
+                        address=address,
+                        latitude=float(latitude),
+                        longitude=float(longitude),
+                        label=label if label else None,
+                        principal=True
+                    )
+                    cliente.direccion = direccion_obj
+                    cliente.save()
+                except Exception as e:
+                    form.add_error(None, f"Error creando dirección: {e}")
+                    return self.form_invalid(form)
+
+        # Caso: cliente existente
+        elif cliente_id:
+            try:
+                cliente = Cliente.objects.get(pk=cliente_id)
+            except Cliente.DoesNotExist:
+                form.add_error("cliente", "El cliente seleccionado no existe")
+                return self.form_invalid(form)
+
+        # Asignamos cliente y usuario a la cita
+        form.instance.cliente = cliente
         form.instance.usuario = self.request.user
+
+        # Guardamos la cita
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):

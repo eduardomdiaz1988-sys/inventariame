@@ -13,7 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let map, marker, geocoder;
 
   function initMap(center) {
-    map = new google.maps.Map(document.getElementById("map"), {
+    const mapEl = document.getElementById("map");
+    if (!mapEl) return; // ✅ evita error si no existe el div
+
+    map = new google.maps.Map(mapEl, {
       center: center || fallbackSpain,
       zoom: center ? 14 : 6,
       mapTypeControl: false,
@@ -39,45 +42,51 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Botón "Usar mi ubicación"
-  useMyLocationBtn.addEventListener("click", () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-      map.setCenter(latLng);
-      map.setZoom(15);
-      marker = placeMarker(latLng, map, marker, latField, lngField, saveBtn, addressField);
-      reverseGeocode(latLng, geocoder, addressField, latField, lngField, saveBtn);
+  if (useMyLocationBtn) {
+    useMyLocationBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const latLng = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+        if (map) {
+          map.setCenter(latLng);
+          map.setZoom(15);
+          marker = placeMarker(latLng, map, marker, latField, lngField, saveBtn, addressField);
+          reverseGeocode(latLng, geocoder, addressField, latField, lngField, saveBtn);
+        }
+      });
     });
-  });
+  }
 
   // Guardar dirección
-  saveBtn.addEventListener("click", async () => {
-    const payload = {
-      address: addressField.value,
-      latitude: parseFloat(latField.value),
-      longitude: parseFloat(lngField.value),
-      label: labelField.value.trim()
-    };
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const payload = {
+        address: addressField?.value || "",
+        latitude: parseFloat(latField?.value) || null,
+        longitude: parseFloat(lngField?.value) || null,
+        label: labelField?.value.trim() || ""
+      };
 
-    try {
-      const res = await fetch("{% url 'location_save_address' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCookie("csrftoken")
-        },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert("Dirección guardada");
-        labelField.value = "";
-      } else {
-        alert(data.error || "Error al guardar la dirección");
+      try {
+        const res = await fetch("/locations/save/", { // ✅ ajusta a tu endpoint real
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("Dirección guardada");
+          if (labelField) labelField.value = "";
+        } else {
+          alert(data.error || "Error al guardar la dirección");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error de red al guardar");
       }
-    } catch (err) {
-      console.error(err);
-      alert("Error de red al guardar");
-    }
-  });
+    });
+  }
 });

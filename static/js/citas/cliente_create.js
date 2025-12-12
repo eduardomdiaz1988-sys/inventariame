@@ -1,60 +1,43 @@
 export function initClienteCreate(
   btnCrearCliente,
   clienteForm,
-  clienteSelect,
   clienteHidden,
   cardCliente,
-  cardCita,
-  cargarDirecciones
+  cardCita
 ) {
-  btnCrearCliente.addEventListener("click", () => {
-    const formData = new FormData(clienteForm);
+  if (!btnCrearCliente) return;
 
-    // Capturamos los campos del mapa
+  btnCrearCliente.addEventListener("click", () => {
+    // Recoger valores del formulario parcial
+    const nombre = document.getElementById("id_nombre")?.value.trim() || "";
+    const telefono = document.getElementById("id_telefono")?.value.trim() || "";
     const address = document.getElementById("addressField")?.value || "";
-    const latitude = document.getElementById("latField")?.value || "";
-    const longitude = document.getElementById("lngField")?.value || "";
+    const lat = document.getElementById("latField")?.value || "";
+    const lng = document.getElementById("lngField")?.value || "";
     const label = document.getElementById("labelField")?.value || "";
 
-    formData.append("address", address);
-    formData.append("latitude", latitude);
-    formData.append("longitude", longitude);
-    formData.append("label", label);
+    // Validación mínima: nombre obligatorio
+    if (!nombre) {
+      alert("El nombre del cliente es obligatorio");
+      return;
+    }
 
-    fetch("/clientes/create-ajax/", {
-      method: "POST",
-      body: formData,
-      headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value }
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.id) {
-        // Guardamos el id y la dirección en dataset
-        clienteHidden.value = data.id;
-        clienteHidden.dataset.direccion = data.direccion || "";
-        clienteHidden.dataset.label = data.label || "";
+    // Copiar valores a los hidden del formulario final
+    document.getElementById("id_nombre_hidden").value = nombre;
+    document.getElementById("id_telefono_hidden").value = telefono;
+    document.getElementById("id_address_hidden").value = address;
+    document.getElementById("id_lat_hidden").value = lat;
+    document.getElementById("id_lng_hidden").value = lng;
+    document.getElementById("id_label_hidden").value = label;
 
-        // Rellenar automáticamente el campo direccion del formulario de cita
-        const direccionSelect = document.getElementById("id_direccion");
-        if (direccionSelect) {
-          direccionSelect.innerHTML = ""; // limpiar opciones previas
-          const option = new Option(
-            `${data.label ? data.label+" — " : ""}${data.direccion}`,
-            data.id,
-            true,
-            true
-          );
-          direccionSelect.appendChild(option);
-        }
+    // Guardar también en dataset para el resumen
+    if (clienteHidden) {
+      clienteHidden.dataset.direccion = address;
+      clienteHidden.dataset.label = label;
+    }
 
-        cardCliente.classList.add("d-none");
-        cardCita.classList.remove("d-none");
-
-        // cargar direcciones del cliente (si quieres refrescar más de una)
-        cargarDirecciones(data.id);
-      } else {
-        alert("Error al crear cliente");
-      }
-    });
+    // Avanzar al paso de cita
+    cardCliente.classList.add("d-none");
+    cardCita.classList.remove("d-none");
   });
 }

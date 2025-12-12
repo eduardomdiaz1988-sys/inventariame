@@ -16,7 +16,12 @@
     {% for cliente in clientes %}
     <tr>
       <td>{{ cliente.nombre }}</td>
-      <td>{{ cliente.telefono|default:"-" }}</td>
+      <td>
+        <a href="tel:+34{{ cliente.telefono|default:"-" }}" class="btn btn-outline-primary">
+          <i class="bi bi-telephone"></i> {{ cliente.telefono|default:"-" }}
+        </a>
+        
+        </td>
       <td>
         {% if cliente.direccion %}
           {{ cliente.direccion.label|default:"(sin etiqueta)" }} — {{ cliente.direccion.address }}

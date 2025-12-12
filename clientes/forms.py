@@ -1,6 +1,35 @@
 from django import forms
 from .models import Cliente
 from locations.models import Address
+from django import forms
+from citas.models import Cita
+
+class CitaWithClientForm(forms.ModelForm):
+    # Campos de cliente/dirección como hidden
+    cliente = forms.IntegerField(required=False, widget=forms.HiddenInput())
+    nombre = forms.CharField(required=False, widget=forms.HiddenInput())
+    telefono = forms.CharField(required=False, widget=forms.HiddenInput())
+    address = forms.CharField(required=False, widget=forms.HiddenInput())
+    latitude = forms.FloatField(required=False, widget=forms.HiddenInput())
+    longitude = forms.FloatField(required=False, widget=forms.HiddenInput())
+    label = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    class Meta:
+        model = Cita
+        fields = [
+            "fecha",
+            "estado",
+            "oferta",
+            "recordatorio",
+            # cliente y dirección se pasan como hidden
+            "cliente", "nombre", "telefono", "address", "latitude", "longitude", "label"
+        ]
+        widgets = {
+            "fecha": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "estado": forms.Select(attrs={"class": "form-select"}),
+            "oferta": forms.TextInput(attrs={"class": "form-control"}),
+            "recordatorio": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
 
 class ClienteForm(forms.ModelForm):
     class Meta:

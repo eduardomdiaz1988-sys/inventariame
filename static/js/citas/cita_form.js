@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCrearCliente = document.getElementById("btnCrearCliente");
   const formNuevoCliente = document.getElementById("formNuevoCliente");
 
+  // Calendario para fecha de cita
   flatpickr("#id_fecha", {
     enableTime: true,
     dateFormat: "Y-m-d H:i",
@@ -43,73 +44,75 @@ document.addEventListener("DOMContentLoaded", () => {
     const query = e.target.value;
     if (query.length < 2) return;
 
-    const response = await fetch(`/clientes/api/buscar/?q=${encodeURIComponent(query)}`);
-    const resultados = await response.json();
+    try {
+      const response = await fetch(`/clientes/api/buscar/?q=${encodeURIComponent(query)}`);
+      const resultados = await response.json();
 
-    resultadosCliente.innerHTML = "";
-    resultados.forEach(cliente => {
-      const item = document.createElement("button");
-      item.className = "list-group-item list-group-item-action";
-      item.textContent = `${cliente.nombre} (${cliente.telefono})`;
-      item.addEventListener("click", () => {
-        clienteHidden.value = cliente.id;
-        clienteHidden.dataset.direccion = cliente.direccion || "";
-        clienteHidden.dataset.label = cliente.label || "";
-        cargarDirecciones(cliente.id, direccionSelect);
-        cardCita.classList.remove("d-none");
+      resultadosCliente.innerHTML = "";
+      resultados.forEach(cliente => {
+        const item = document.createElement("button");
+        item.className = "list-group-item list-group-item-action";
+        item.textContent = `${cliente.nombre} (${cliente.telefono})`;
+        item.addEventListener("click", () => {
+          // Guardar cliente existente en hidden
+          clienteHidden.value = cliente.id;
+          clienteHidden.dataset.direccion = cliente.direccion || "";
+          clienteHidden.dataset.label = cliente.label || "";
+
+          cargarDirecciones(cliente.id, direccionSelect);
+          cardCliente.classList.add("d-none");
+          cardCita.classList.remove("d-none");
+        });
+        resultadosCliente.appendChild(item);
       });
-      resultadosCliente.appendChild(item);
-    });
+    } catch (err) {
+      console.error("Error buscando cliente:", err);
+    }
   });
 
-  // Crear nuevo cliente
+  // Crear nuevo cliente (solo copia datos, no AJAX)
   initClienteCreate(
     btnCrearCliente,
     clienteForm,
-    null,
     clienteHidden,
     cardCliente,
-    cardCita,
-    (id) => cargarDirecciones(id, direccionSelect)
+    cardCita
   );
 
-  // 🔥 NUEVO: Lógica para el paso 3 (resumen)
+  // Paso 3: Resumen
   const btnResumen = document.getElementById("btnResumen");
   if (btnResumen && cardResumen) {
     btnResumen.addEventListener("click", () => {
-      // Rellenar resumen
-      document.getElementById("resCliente").textContent =
-        document.getElementById("id_nombre")?.value || "—";
-      document.getElementById("resTelefono").textContent =
-        document.getElementById("id_telefono")?.value || "—";
+      // Validación mínima antes de avanzar
+      const nombre = document.getElementById("id_nombre_hidden").value.trim();
+      const fecha = document.getElementById("id_fecha").value;
 
-      const direccion = clienteHidden.dataset.direccion || "";
-      const label = clienteHidden.dataset.label || "";
+      if (!nombre) {
+        alert("El nombre del cliente es obligatorio");
+        return;
+      }
+      if (!fecha) {
+        alert("La fecha de la cita es obligatoria");
+        return;
+      }
+
+      // Usar SIEMPRE los hidden para rellenar el resumen
+      const telefono = document.getElementById("id_telefono_hidden").value || "—";
+      const direccion = document.getElementById("id_address_hidden").value || "";
+      const label = document.getElementById("id_label_hidden").value || "";
+
+      document.getElementById("resCliente").textContent = nombre;
+      document.getElementById("resTelefono").textContent = telefono;
       document.getElementById("resDireccion").textContent =
         label ? `${label} — ${direccion}` : direccion || "—";
 
-      document.getElementById("resFecha").textContent =
-        document.getElementById("id_fecha").value;
+      document.getElementById("resFecha").textContent = fecha;
       document.getElementById("resEstado").textContent =
-        document.getElementById("id_estado").value;
+        document.getElementById("id_estado").value || "—";
       document.getElementById("resOferta").textContent =
-        document.getElementById("id_oferta").value;
+        document.getElementById("id_oferta").value || "—";
       document.getElementById("resRecordatorio").textContent =
         document.getElementById("id_recordatorio").checked ? "Sí" : "No";
-
-      // 🔥 NUEVO: Copiar datos del cliente nuevo a los hidden del form final
-      document.getElementById("id_nombre_hidden").value =
-        document.getElementById("id_nombre")?.value || "";
-      document.getElementById("id_telefono_hidden").value =
-        document.getElementById("id_telefono")?.value || "";
-      document.getElementById("id_address_hidden").value =
-        document.getElementById("addressField")?.value || "";
-      document.getElementById("id_lat_hidden").value =
-        document.getElementById("latField")?.value || "";
-      document.getElementById("id_lng_hidden").value =
-        document.getElementById("lngField")?.value || "";
-      document.getElementById("id_label_hidden").value =
-        document.getElementById("labelField")?.value || "";
 
       cardCita.classList.add("d-none");
       cardResumen.classList.remove("d-none");
