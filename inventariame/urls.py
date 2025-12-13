@@ -31,5 +31,5 @@ urlpatterns = [
     path("ofertas/", include("oferta.urls")),
     path("citas/", include("citas.urls")),
     path("agenda/", include("agenda.urls")),
-
+    path("mantenimientos/", include("mantenimientos.urls")),
 ]

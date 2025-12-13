@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "voice_search",
     "locations",
     "agenda",
+    "mantenimientos",
 ]
 
 MIDDLEWARE = [

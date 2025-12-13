@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% now "Y-m-d" as today %}
+
+{% block content_authenticated %}
+<h2>{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} mantenimiento</h2>
+
+{# Errores globales y por campo #}
+{% if form.non_field_errors %}
+<div class="alert alert-danger mb-3">
+  {{ form.non_field_errors }}
+</div>
+{% endif %}
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <div class="mb-3">
+    {{ form.fecha.label_tag }}
+    {{ form.fecha }}
+    {% if form.fecha.errors %}
+    <div class="text-danger small mt-1">
+      {{ form.fecha.errors|striptags }}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="mb-3">
+    {{ form.cantidad.label_tag }}
+    {{ form.cantidad }}
+    <div class="form-text">Rango permitido: 0 a 15. La media alta es 7.</div>
+    {% if form.cantidad.errors %}
+    <div class="text-danger small mt-1">
+      {{ form.cantidad.errors|striptags }}
+    </div>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="btn btn-success">Guardar</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+  flatpickr(".flatpickr", {
+    dateFormat: "Y-m-d",
+    locale: "es",
+    defaultDate: "{% if form.initial.fecha %}{{ form.initial.fecha|date:'Y-m-d' }}{% else %}{{ today }}{% endif %}"
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<h2>Detalle de mantenimiento</h2>
+<p><strong>Fecha:</strong> {{ mantenimiento.fecha }}</p>
+<p><strong>Cantidad:</strong> {{ mantenimiento.cantidad }}</p>
+<p><strong>Creado:</strong> {{ mantenimiento.created_at|date:"Y-m-d H:i" }}</p>
+
+<a href="{% url 'mantenimiento_update' mantenimiento.pk %}" class="btn btn-outline-primary">Editar</a>
+<a href="{% url 'mantenimiento_delete' mantenimiento.pk %}" class="btn btn-outline-danger">Eliminar</a>
+{% endblock %}

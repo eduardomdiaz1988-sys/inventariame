@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<h2>Mantenimientos</h2>
+<a href="{% url 'mantenimiento_create' %}" class="btn btn-danger mb-2">
+  <i class="bi bi-plus-lg"></i> Nuevo
+</a>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Fecha</th>
+      <th>Cantidad</th>
+      <th>Creado</th>
+      <th class="text-end">Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in mantenimientos %}
+    <tr onclick="window.location.href='{% url 'mantenimiento_detail' m.pk %}'">
+      <td>{{ m.fecha }}</td>
+      <td>{{ m.cantidad }}</td>
+      <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+      <td class="text-end">
+        <a href="{% url 'mantenimiento_update' m.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="{% url 'mantenimiento_delete' m.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Sin registros</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
