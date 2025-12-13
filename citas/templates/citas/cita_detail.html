@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h2 class="mb-0">Detalles de la cita</h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'cita_update' cita.pk %}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-pencil"></i> Editar
+    </a>
+    <a href="{% url 'cita_delete' cita.pk %}" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-x-lg"></i> Eliminar
+    </a>
+  </div>
+</div>
+
+<div class="card p-3">
+  <dl class="row mb-0">
+    <dt class="col-sm-3">Cliente</dt>
+    <dd class="col-sm-9">{{ cita.cliente }}</dd>
+
+    <dt class="col-sm-3">Fecha</dt>
+    <dd class="col-sm-9">{{ cita.fecha|date:"Y-m-d H:i" }}</dd>
+
+    <dt class="col-sm-3">Recordatorio</dt>
+    <dd class="col-sm-9">{{ cita.recordatorio|yesno:"Sí,No" }}</dd>
+
+    <dt class="col-sm-3">Oferta</dt>
+    <dd class="col-sm-9">
+      {% if cita.oferta %}
+        {{ cita.oferta.nombre }} ({{ cita.oferta.valor }})
+      {% else %}
+        -
+      {% endif %}
+    </dd>
+
+    <dt class="col-sm-3">Estado</dt>
+    <dd class="col-sm-9">{{ cita.estado }}</dd>
+
+    <dt class="col-sm-3">Venta asociada</dt>
+    <dd class="col-sm-9">{{ cita.venta|default:"-" }}</dd>
+  </dl>
+</div>
+{% endblock %}

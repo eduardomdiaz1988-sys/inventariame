@@ -1,6 +1,6 @@
 # Create your views here.
 from django.conf import settings
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView,DetailView
 from django.urls import reverse_lazy
 
 from citas.forms import CitaWithClientForm
@@ -118,3 +118,8 @@ class CitaDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "core/confirm_delete.html"
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Eliminar Cita"}
+
+class CitaDetailView(DetailView):
+    model = Cita
+    template_name = "citas/cita_detail.html"
+    context_object_name = "cita"

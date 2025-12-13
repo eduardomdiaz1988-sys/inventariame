@@ -1,42 +1,86 @@
-/* Layout */
-.sidebar { width: 260px; min-height: 100vh; }
-.logo-img { height: 32px; max-width: 120px; object-fit: contain; }
-
-/* Links sidebar */
-.sidebar .nav-link { padding: .25rem 0; opacity: .95; display: block; width: 100%; }
-.sidebar .nav-link:hover { opacity: 1; text-decoration: underline; }
-
-/* Cards (dashboard) */
-.card-kpi {
-  border: 1px solid #e9ecef; border-radius: .5rem; padding: 1rem;
-  display: flex; align-items: center; gap: .75rem; background: #fff;
+/* === Layout general === */
+.sidebar { 
+  width: 260px; 
+  min-height: 100vh; 
+  transition: transform 0.3s ease; 
 }
-.card-kpi .icon { font-size: 1.5rem; color: #b30000; }
-.card-kpi .value { font-weight: 700; font-size: 1.25rem; }
-.card-kpi .label { font-size: .85rem; color: #666; }
+.logo-img { 
+  height: 32px; 
+  max-width: 120px; 
+  object-fit: contain; 
+}
+@media (max-width: 576px) {
+  .logo-img { height: 28px; max-width: 100px; }
+}
 
-/* Dark mode */
+/* === Links sidebar === */
+.sidebar .nav-link { 
+  padding: .25rem 0; 
+  opacity: .95; 
+  display: block; 
+  width: 100%; 
+}
+.sidebar .nav-link:hover { 
+  opacity: 1; 
+  text-decoration: underline; 
+}
+
+/* === Cards (dashboard) === */
+.card-kpi {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+}
+.card-kpi .icon { font-size: 2rem; color: #dc3545; }
+.card-kpi .value { font-size: 1.5rem; font-weight: bold; color: #212529; }
+.card-kpi .label { font-size: 0.9rem; color: #6c757d; }
+.hover-card:hover { background-color: #f8f9fa; transform: scale(1.02); }
+.hover-kpi:hover { transform: scale(1.03); background-color: #f8f9fa; }
+
+/* === Dark mode === */
 :root[data-theme="dark"] body { background: #1f1f1f; color: #eee; }
 :root[data-theme="dark"] .navbar { background: #2a2a2a !important; }
 :root[data-theme="dark"] .card-kpi { background: #2a2a2a; border-color: #3a3a3a; }
 :root[data-theme="dark"] .sidebar { background: #8a0000 !important; }
 
-/* Sidebar oculto en móviles */
-#sidebar { transition: transform 0.3s ease; }
+/* === Sidebar responsive === */
 @media (max-width: 991px) {
   #sidebar {
-    position: fixed; top: 0; left: 0; height: 100vh; width: 260px;
+    position: fixed; top: 0; left: 0;
+    height: 100vh; width: 260px;
     z-index: 1050; transform: translateX(-100%);
   }
   #sidebar.active { transform: translateX(0); }
 }
-
-.logo-img { height: 32px; max-width: 120px; object-fit: contain; }
-@media (max-width: 576px) {
-  .logo-img { height: 28px; max-width: 100px; }
+@media (min-width: 992px) {
+  #sidebar { transform: none !important; position: static; }
 }
 
-/* Animación bounce al pasar el ratón */
+/* === Overlay para móviles === */
+#sidebar-overlay {
+  display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4); z-index: 1040;
+}
+@media (max-width: 991px) {
+  #sidebar.active + #sidebar-overlay { display: block; }
+}
+
+/* === Navbar ajustes móviles === */
+@media (max-width: 576px) {
+  .navbar .d-flex, .navbar form { margin-top: 0.5rem; }
+}
+@media (max-width: 991px) {
+  #darkModeToggleMobile { display: block; width: 100%; }
+}
+
+/* === Animación logo === */
 .logo-anim:hover { animation: bounce 0.6s; }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
@@ -44,57 +88,7 @@
   60% { transform: translateY(3px); }
 }
 
-/* Cards hover */
-.hover-card:hover {
-  background-color: #f8f9fa; transform: scale(1.02); transition: all 0.2s ease-in-out;
-}
-
-.card-kpi {
-  background-color: #fff; border-radius: 8px; padding: 1rem;
-  display: flex; align-items: center; gap: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.2s ease-in-out;
-}
-.card-kpi .icon { font-size: 2rem; color: #dc3545; }
-.card-kpi .value { font-size: 1.5rem; font-weight: bold; color: #212529; }
-.card-kpi .label { font-size: 0.9rem; color: #6c757d; }
-.hover-kpi:hover { transform: scale(1.03); background-color: #f8f9fa; }
-
-/* Sidebar base */
-#sidebar { width: 260px; min-height: 100vh; transition: transform 0.3s ease; }
-
-/* Sidebar oculto en móviles */
-@media (max-width: 991px) {
-  #sidebar {
-    position: fixed; top: 0; left: 0; height: 100vh; width: 260px;
-    z-index: 1050; transform: translateX(-100%); /* oculto por defecto */
-  }
-  #sidebar.active { transform: translateX(0); /* visible cuando tiene la clase active */ }
-}
-
-/* En pantallas grandes el sidebar siempre visible */
-@media (min-width: 992px) {
-  #sidebar { transform: none !important; position: static; }
-}
-
-/* Overlay para móviles */
-#sidebar-overlay {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4); z-index: 1040; /* justo debajo del sidebar */
-}
-@media (max-width: 991px) {
-  #sidebar.active + #sidebar-overlay { display: block; }
-}
-
-@media (max-width: 576px) {
-  .navbar .d-flex { margin-top: 0.5rem; }
-  .navbar form { margin-top: 0.5rem; }
-}
-@media (max-width: 991px) {
-  #darkModeToggleMobile { display: block; width: 100%; }
-}
-
-/* --- Ajustes para colapsables del sidebar --- */
-/* Animación vertical suave usando height */
+/* === Colapsables del sidebar === */
 #sidebar .collapsing {
   height: 0;
   overflow: hidden;
@@ -103,8 +97,6 @@
 }
 #sidebar .collapse { overflow: hidden; }
 #sidebar .collapse.show { height: auto; }
-
-/* Contenido interno en columna estable */
 #sidebar .collapse > .nav {
   display: flex; flex-direction: column; margin: 0; padding: 0;
 }
@@ -113,3 +105,43 @@
 /* Chevron rotatorio */
 .sidebar-toggle-icon { transition: transform 0.2s ease; }
 .sidebar-toggle[aria-expanded="true"] .sidebar-toggle-icon { transform: rotate(180deg); }
+
+/* === Citas según estado === */
+.cita-row { cursor: pointer; transition: background-color 0.2s ease; }
+
+/* Hover general (fallback) */
+.cita-row:hover td { background-color: #f1f1f1 !important; }
+
+/* Anular el box-shadow de Bootstrap para permitir colores personalizados */
+.table-hover tbody tr.cita-pendiente > td,
+.table-hover tbody tr.cita-completada > td,
+.table-hover tbody tr.cita-hoy > td,
+.table-hover tbody tr.cita-hoy.cita-pendiente > td {
+  box-shadow: none !important;
+}
+
+/* Colores por estado base */
+.table-hover tbody tr.cita-completada > td {
+  background-color: #d4edda !important;  /* verde claro */
+  color: #155724;
+}
+.table-hover tbody tr.cita-pendiente > td {
+  background-color: #fff8e1 !important;  /* amarillo claro */
+  color: #856404;
+}
+/* Condición especial: cita de hoy y pendiente → azul */
+.table-hover tbody tr.cita-hoy.cita-pendiente > td {
+  background-color: #e0f0ff !important;  /* azul claro */
+  color: #004085;
+}
+
+/* Hovers más oscuros por estado */
+.table-hover tbody tr.cita-completada:hover > td {
+  background-color: #c3e6cb !important;  /* verde más intenso */
+}
+.table-hover tbody tr.cita-pendiente:hover > td {
+  background-color: #ffe08a !important;  /* amarillo más intenso */
+}
+.table-hover tbody tr.cita-hoy.cita-pendiente:hover > td {
+  background-color: #b8daff !important;  /* azul más intenso */
+}
