@@ -1,9 +1,30 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content_authenticated %}
 <h2>Mantenimientos</h2>
-<a href="{% url 'mantenimiento_create' %}" class="btn btn-danger mb-2">
-  <i class="bi bi-plus-lg"></i> Nuevo
-</a>
+
+<div class="d-flex justify-content-between mb-3">
+  <div>
+    <a href="{% url 'mantenimiento_create' %}" class="btn btn-danger me-2">
+      <i class="bi bi-plus-lg"></i> Nuevo
+    </a>
+    <a href="{% url 'mantenimiento_create' %}?fecha={{ today }}" class="btn btn-success">
+      Registrar hoy
+    </a>
+  </div>
+  <form method="get" class="d-flex">
+    <input type="text" name="start" class="form-control flatpickr me-2" placeholder="Inicio" value="{{ request.GET.start }}">
+    <input type="text" name="end" class="form-control flatpickr me-2" placeholder="Fin" value="{{ request.GET.end }}">
+    <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+  </form>
+</div>
+
+<!-- Estadísticas rápidas -->
+<div class="alert alert-info mb-3">
+  <strong>Total mes:</strong> {{ total_mes }} · 
+  <strong>Promedio:</strong> {{ promedio }} · 
+  <strong>Máximo:</strong> {{ maximo }}
+</div>
 
 <table class="table table-hover">
   <thead>
@@ -16,9 +37,18 @@
   </thead>
   <tbody>
     {% for m in mantenimientos %}
-    <tr onclick="window.location.href='{% url 'mantenimiento_detail' m.pk %}'">
+    <tr class="
+      {% if m.cantidad <= 5 %}table-success
+      {% elif m.cantidad <= 10 %}table-warning
+      {% else %}table-danger{% endif %}
+    " onclick="window.location.href='{% url 'mantenimiento_detail' m.pk %}'">
       <td>{{ m.fecha }}</td>
-      <td>{{ m.cantidad }}</td>
+      <td>
+        {{ m.cantidad }}
+        {% if m.cantidad > 10 %}
+          <span class="badge bg-danger ms-1">🔥</span>
+        {% endif %}
+      </td>
       <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
       <td class="text-end">
         <a href="{% url 'mantenimiento_update' m.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
@@ -30,4 +60,32 @@
     {% endfor %}
   </tbody>
 </table>
+
+<!-- Gráfico -->
+<div class="mt-4">
+  <canvas id="graficoMantenimientos"></canvas>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  flatpickr(".flatpickr", { dateFormat: "Y-m-d", locale: "es" });
+
+  const ctx = document.getElementById('graficoMantenimientos');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: {{ dias_json|safe }},
+      datasets: [{
+        label: 'Mantenimientos últimos 30 días',
+        data: {{ cantidades_json|safe }},
+        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+      }]
+    }
+  });
+</script>
 {% endblock %}
