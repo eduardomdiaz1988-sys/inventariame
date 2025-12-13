@@ -1,0 +1,26 @@
+<!-- mantenimientos/templates/mantenimientos/configuracion_form.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block content_authenticated %}
+<h2>Configuración de festivos del mes</h2>
+
+<form method="post" class="mt-3">
+  {% csrf_token %}
+  <div class="mb-3">
+    {{ form.año.label_tag }}
+    {{ form.año }}
+  </div>
+  <div class="mb-3">
+    {{ form.mes.label_tag }}
+    {{ form.mes }}
+  </div>
+  <div class="mb-3">
+    {{ form.dias_festivos.label_tag }}
+    {{ form.dias_festivos }}
+    <div class="form-text">Número de días festivos oficiales que reducen la meta mensual.</div>
+  </div>
+  <button type="submit" class="btn btn-primary">Guardar</button>
+  <a href="{% url 'mantenimiento_list' %}" class="btn btn-outline-secondary">Volver</a>
+</form>
+{% endblock %}

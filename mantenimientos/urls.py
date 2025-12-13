@@ -1,10 +1,16 @@
+# mantenimientos/urls.py
 from django.urls import path
-from . import views
+from .views import (
+    MantenimientoListView, MantenimientoDetailView,
+    MantenimientoCreateView, MantenimientoUpdateView, MantenimientoDeleteView,
+    ConfiguracionUpdateView
+)
 
 urlpatterns = [
-    path("", views.MantenimientoListView.as_view(), name="mantenimiento_list"),
-    path("<int:pk>/", views.MantenimientoDetailView.as_view(), name="mantenimiento_detail"),
-    path("crear/", views.MantenimientoCreateView.as_view(), name="mantenimiento_create"),
-    path("<int:pk>/editar/", views.MantenimientoUpdateView.as_view(), name="mantenimiento_update"),
-    path("<int:pk>/eliminar/", views.MantenimientoDeleteView.as_view(), name="mantenimiento_delete"),
+    path("", MantenimientoListView.as_view(), name="mantenimiento_list"),
+    path("detalle/<int:pk>/", MantenimientoDetailView.as_view(), name="mantenimiento_detail"),
+    path("crear/", MantenimientoCreateView.as_view(), name="mantenimiento_create"),
+    path("editar/<int:pk>/", MantenimientoUpdateView.as_view(), name="mantenimiento_update"),
+    path("eliminar/<int:pk>/", MantenimientoDeleteView.as_view(), name="mantenimiento_delete"),
+    path("configuracion/", ConfiguracionUpdateView.as_view(), name="configuracion_update"),
 ]

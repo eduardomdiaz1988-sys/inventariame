@@ -1,3 +1,4 @@
+<!-- mantenimientos/templates/mantenimientos/mantenimiento_list.html -->
 {% extends "base.html" %}
 {% load static %}
 {% block content_authenticated %}
@@ -11,19 +12,19 @@
     <a href="{% url 'mantenimiento_create' %}?fecha={{ today }}" class="btn btn-success">
       Registrar hoy
     </a>
+    <a href="{% url 'configuracion_update' %}" class="btn btn-outline-secondary ms-2">
+      Configurar festivos
+    </a>
   </div>
-  <form method="get" class="d-flex">
-    <input type="text" name="start" class="form-control flatpickr me-2" placeholder="Inicio" value="{{ request.GET.start }}">
-    <input type="text" name="end" class="form-control flatpickr me-2" placeholder="Fin" value="{{ request.GET.end }}">
-    <button type="submit" class="btn btn-outline-primary">Filtrar</button>
-  </form>
 </div>
 
-<!-- Estadísticas rápidas -->
 <div class="alert alert-info mb-3">
-  <strong>Total mes:</strong> {{ total_mes }} · 
-  <strong>Promedio:</strong> {{ promedio }} · 
-  <strong>Máximo:</strong> {{ maximo }}
+  <strong>Meta mensual (ajustada):</strong> {{ meta_mensual }} <br>
+  <strong>Producción total:</strong> {{ produccion_total }} <br>
+  <strong>Cumplimiento:</strong> {{ cumplimiento }}% <br>
+  <strong>Media L-V:</strong> {{ media_lv }} <br>
+  <strong>Extras (sábados):</strong> {{ extras }} <br>
+  <strong>Días festivos declarados:</strong> {{ dias_festivos }}
 </div>
 
 <table class="table table-hover">
@@ -31,7 +32,6 @@
     <tr>
       <th>Fecha</th>
       <th>Cantidad</th>
-      <th>Creado</th>
       <th class="text-end">Acciones</th>
     </tr>
   </thead>
@@ -49,19 +49,17 @@
           <span class="badge bg-danger ms-1">🔥</span>
         {% endif %}
       </td>
-      <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
       <td class="text-end">
         <a href="{% url 'mantenimiento_update' m.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
         <a href="{% url 'mantenimiento_delete' m.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
       </td>
     </tr>
     {% empty %}
-    <tr><td colspan="4">Sin registros</td></tr>
+    <tr><td colspan="3">Sin registros</td></tr>
     {% endfor %}
   </tbody>
 </table>
 
-<!-- Gráfico -->
 <div class="mt-4">
   <canvas id="graficoMantenimientos"></canvas>
 </div>
@@ -73,8 +71,6 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  flatpickr(".flatpickr", { dateFormat: "Y-m-d", locale: "es" });
-
   const ctx = document.getElementById('graficoMantenimientos');
   new Chart(ctx, {
     type: 'bar',

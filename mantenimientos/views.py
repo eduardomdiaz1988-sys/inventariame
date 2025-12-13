@@ -1,11 +1,11 @@
+# mantenimientos/views.py
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.db.models import Sum, Avg, Max
-from .models import Mantenimiento
-from .forms import MantenimientoForm
-import datetime
-import json
+from django.db.models import Sum
+from .models import Mantenimiento, ConfiguracionMantenimientos
+from .forms import MantenimientoForm, ConfiguracionForm
+import datetime, calendar, json
 
 class MantenimientoListView(LoginRequiredMixin, ListView):
     model = Mantenimiento
@@ -13,31 +13,67 @@ class MantenimientoListView(LoginRequiredMixin, ListView):
     context_object_name = "mantenimientos"
 
     def get_queryset(self):
-        qs = Mantenimiento.objects.filter(usuario=self.request.user)
-        start = self.request.GET.get("start")
-        end = self.request.GET.get("end")
-        if start and end:
-            qs = qs.filter(fecha__range=[start, end])
-        return qs
+        return Mantenimiento.objects.filter(usuario=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         qs = self.get_queryset()
-
-        # Estadísticas rápidas
         hoy = datetime.date.today()
-        context["today"] = hoy
-        context["total_mes"] = qs.filter(fecha__month=hoy.month).aggregate(Sum("cantidad"))["cantidad__sum"] or 0
-        context["promedio"] = round(qs.aggregate(Avg("cantidad"))["cantidad__avg"] or 0, 2)
-        context["maximo"] = qs.aggregate(Max("cantidad"))["cantidad__max"] or 0
+
+        # Configuración de festivos persistente por usuario/mes
+        config = ConfiguracionMantenimientos.objects.filter(
+            usuario=self.request.user, año=hoy.year, mes=hoy.month
+        ).first()
+        dias_festivos = config.dias_festivos if config else 0
+
+        # Días del mes y laborables
+        _, num_days = calendar.monthrange(hoy.year, hoy.month)
+        dias_mes = [datetime.date(hoy.year, hoy.month, d) for d in range(1, num_days+1)]
+        dias_laborables = [d for d in dias_mes if d.weekday() < 5]  # 0-4: L-V
+
+        # Meta ajustada por festivos
+        dias_laborables_ajustados = max(len(dias_laborables) - dias_festivos, 0)
+        meta_mensual = dias_laborables_ajustados * 7
+
+        # Producción del mes (todas las fechas)
+        produccion_mes = qs.filter(fecha__month=hoy.month).aggregate(Sum("cantidad"))["cantidad__sum"] or 0
+
+        # Producción L-V
+        produccion_lv = qs.filter(fecha__month=hoy.month, fecha__week_day__in=[2,3,4,5,6]) \
+                          .aggregate(Sum("cantidad"))["cantidad__sum"] or 0
+        dias_lv_registrados = qs.filter(fecha__month=hoy.month, fecha__week_day__in=[2,3,4,5,6]).count()
+        media_lv = produccion_lv / dias_lv_registrados if dias_lv_registrados else 0
+
+        # Producción sábados
+        produccion_sabados = qs.filter(fecha__month=hoy.month, fecha__week_day=7) \
+                               .aggregate(Sum("cantidad"))["cantidad__sum"] or 0
+
+        # Lógica de inclusión de sábados según media L-V
+        if media_lv < 7:
+            produccion_total = produccion_mes   # sábados sí cuentan
+            extras = 0
+        else:
+            produccion_total = produccion_lv    # sábados cuentan como extra
+            extras = produccion_sabados
+
+        cumplimiento = round((produccion_total / meta_mensual) * 100, 2) if meta_mensual else 0
 
         # Datos para gráfico (últimos 30 días)
         ultimos = qs.filter(fecha__gte=hoy - datetime.timedelta(days=30)).order_by("fecha")
         dias = [m.fecha.strftime("%Y-%m-%d") for m in ultimos]
         cantidades = [m.cantidad for m in ultimos]
-        context["dias_json"] = json.dumps(dias)
-        context["cantidades_json"] = json.dumps(cantidades)
 
+        context.update({
+            "today": hoy,
+            "dias_festivos": dias_festivos,
+            "meta_mensual": meta_mensual,
+            "produccion_total": produccion_total,
+            "cumplimiento": cumplimiento,
+            "media_lv": round(media_lv, 2),
+            "extras": extras,
+            "dias_json": json.dumps(dias),
+            "cantidades_json": json.dumps(cantidades),
+        })
         return context
 
 class MantenimientoDetailView(LoginRequiredMixin, DetailView):
@@ -50,7 +86,6 @@ class MantenimientoDetailView(LoginRequiredMixin, DetailView):
         hoy = datetime.date.today()
         inicio_semana = hoy - datetime.timedelta(days=7)
 
-        # Últimos 7 días del mismo usuario
         qs = Mantenimiento.objects.filter(
             usuario=self.request.user,
             fecha__gte=inicio_semana,
@@ -90,3 +125,16 @@ class MantenimientoDeleteView(LoginRequiredMixin, DeleteView):
     model = Mantenimiento
     template_name = "mantenimientos/mantenimiento_confirm_delete.html"
     success_url = reverse_lazy("mantenimiento_list")
+
+class ConfiguracionUpdateView(LoginRequiredMixin, UpdateView):
+    model = ConfiguracionMantenimientos
+    form_class = ConfiguracionForm
+    template_name = "mantenimientos/configuracion_form.html"
+    success_url = reverse_lazy("mantenimiento_list")
+
+    def get_object(self, queryset=None):
+        hoy = datetime.date.today()
+        obj, _ = ConfiguracionMantenimientos.objects.get_or_create(
+            usuario=self.request.user, año=hoy.year, mes=hoy.month
+        )
+        return obj

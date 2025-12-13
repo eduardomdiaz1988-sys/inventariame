@@ -1,3 +1,4 @@
+<!-- mantenimientos/templates/mantenimientos/mantenimiento_detail.html -->
 {% extends "base.html" %}
 {% load static %}
 
@@ -14,7 +15,6 @@
 <a href="{% url 'mantenimiento_update' mantenimiento.pk %}" class="btn btn-outline-primary">Editar</a>
 <a href="{% url 'mantenimiento_delete' mantenimiento.pk %}" class="btn btn-outline-danger">Eliminar</a>
 
-<!-- Mini gráfico de evolución semanal -->
 <div class="mt-4">
   <h5>Evolución últimos 7 días</h5>
   <canvas id="graficoSemana"></canvas>
@@ -39,9 +39,7 @@
       }]
     },
     options: {
-      scales: {
-        y: { beginAtZero: true, max: 15 }
-      }
+      scales: { y: { beginAtZero: true, max: 15 } }
     }
   });
 </script>
