@@ -1,44 +1,18 @@
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
-from .forms import RegistroForm
+from django.contrib.auth.models import User
 from django.db.models import Q, Sum
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.utils import timezone
+import calendar
+
+from .forms import RegistroForm
 from clientes.models import Cliente
 from citas.models import Cita
 from inventory.models import Elemento, Cantidad
 from sales.models import Venta
-from mantenimientos.models import Mantenimiento  ,ConfiguracionMantenimientos # 👈 Importamos el modelo de mantenimientos
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from django.http import JsonResponse
-from django.contrib.auth.models import User
-import calendar
-
-@login_required
-def perfil_view(request):
-    perfil = request.user.perfil  # gracias al OneToOneField con related_name="perfil"
-    return render(request, "users/perfil.html", {"perfil": perfil})
-
-def registro_view(request):
-    if request.method == "POST":
-        tipo_usuario = request.POST.get("tipo_usuario", "individual")
-        form = RegistroForm(request.POST)
-        if form.is_valid():
-            user = form.save(tipo_usuario=tipo_usuario)
-            login(request, user)
-            return redirect("home")
-    else:
-        form = RegistroForm()
-    return render(request, "users/registro.html", {"form": form})
-
-def verificar_usuario(request):
-    username = request.GET.get("username", "")
-    exists = User.objects.filter(username=username).exists()
-    return JsonResponse({"exists": exists})
-
-def logout_view(request):
-    logout(request)
-    return redirect("home")
-
+from mantenimientos.models import Mantenimiento, ConfiguracionMantenimientos, Produccion
 @login_required
 def home_view(request):
     clientes_qs = Cliente.objects.filter(usuario=request.user)
@@ -46,8 +20,8 @@ def home_view(request):
     stock_qs = Cantidad.objects.filter(usuario=request.user, cantidad__lt=2)
 
     hoy = timezone.now().date()
-    ayer = hoy - timezone.timedelta(days=1)
 
+    # --- Mantenimientos del mes ---
     mantenimientos_qs = Mantenimiento.objects.filter(
         usuario=request.user,
         fecha__year=hoy.year,
@@ -55,20 +29,47 @@ def home_view(request):
     )
     mantenimientos_mes = mantenimientos_qs.aggregate(Sum("cantidad"))["cantidad__sum"] or 0
 
+    # --- Ventas del mes ---
+    ventas_qs = Venta.objects.filter(
+        usuario=request.user,
+        fecha__year=hoy.year,
+        fecha__month=hoy.month
+    )
+    ventas_mes = ventas_qs.count()
+
+    # --- Ganancia mensual calculada dinámicamente ---
+    def calcular_ganancia(valor):
+        if valor in [3, 4]:
+            return 12
+        elif valor == 5:
+            return 20
+        elif valor == 7:
+            return 28
+        elif valor == 10:
+            return 40
+        return 0
+
+    ganancia_mes = sum(
+        calcular_ganancia(v.referencia.valor) for v in ventas_qs if v.referencia and v.referencia.valor
+    )
+
+    # --- Configuración de festivos ---
     config = ConfiguracionMantenimientos.objects.filter(
         usuario=request.user, año=hoy.year, mes=hoy.month
     ).first()
     dias_festivos = config.dias_festivos if config else 0
 
+    # --- Meta mensual ---
     _, num_days = calendar.monthrange(hoy.year, hoy.month)
-    dias_mes = [timezone.datetime(hoy.year, hoy.month, d).date() for d in range(1, num_days+1)]
+    dias_mes = [timezone.datetime(hoy.year, hoy.month, d).date() for d in range(1, num_days + 1)]
     dias_laborables = [d for d in dias_mes if d.weekday() < 5]
     dias_laborables_ajustados = max(len(dias_laborables) - dias_festivos, 0)
     meta_mensual = dias_laborables_ajustados * 7
 
-    produccion_lv = mantenimientos_qs.filter(fecha__week_day__in=[2,3,4,5,6]) \
+    # --- Producción ---
+    produccion_lv = mantenimientos_qs.filter(fecha__week_day__in=[2, 3, 4, 5, 6]) \
         .aggregate(Sum("cantidad"))["cantidad__sum"] or 0
-    dias_lv_registrados = mantenimientos_qs.filter(fecha__week_day__in=[2,3,4,5,6]).count()
+    dias_lv_registrados = mantenimientos_qs.filter(fecha__week_day__in=[2, 3, 4, 5, 6]).count()
     media_lv = produccion_lv / dias_lv_registrados if dias_lv_registrados else 0
     produccion_sabados = mantenimientos_qs.filter(fecha__week_day=7) \
         .aggregate(Sum("cantidad"))["cantidad__sum"] or 0
@@ -87,6 +88,8 @@ def home_view(request):
         "proximas": citas_qs.order_by("fecha")[:5],
         "citas_total": citas_qs.count(),
         "mantenimientos_mes": mantenimientos_mes,
+        "ventas_mes": ventas_mes,
+        "ganancia_mes": ganancia_mes,  # ✅ ahora calculada en tiempo real
         "stock_bajo": stock_qs.count(),
         "clientes": clientes_qs.order_by("nombre")[:10],
         "meta_mensual": meta_mensual,
@@ -98,6 +101,36 @@ def home_view(request):
 
     return render(request, "users/dashboard/dashboard.html", context)
 
+@login_required
+def perfil_view(request):
+    perfil = request.user.perfil  # OneToOneField con related_name="perfil"
+    return render(request, "users/perfil.html", {"perfil": perfil})
+
+
+def registro_view(request):
+    if request.method == "POST":
+        tipo_usuario = request.POST.get("tipo_usuario", "individual")
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            user = form.save(tipo_usuario=tipo_usuario)
+            login(request, user)
+            return redirect("home")
+    else:
+        form = RegistroForm()
+    return render(request, "users/registro.html", {"form": form})
+
+
+def verificar_usuario(request):
+    username = request.GET.get("username", "")
+    exists = User.objects.filter(username=username).exists()
+    return JsonResponse({"exists": exists})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("home")
+
+
 def buscar_view(request):
     q = request.GET.get("q", "").strip()
     resultados = {"clientes": [], "citas": [], "ventas": [], "elementos": []}
@@ -105,7 +138,8 @@ def buscar_view(request):
     if q:
         resultados["clientes"] = Cliente.objects.filter(Q(nombre__icontains=q))
         resultados["citas"] = Cita.objects.filter(Q(cliente__nombre__icontains=q))
-        resultados["ventas"] = Venta.objects.filter(Q(referencia__icontains=q))
+        # Referencia es FK: buscamos por el nombre de la referencia
+        resultados["ventas"] = Venta.objects.filter(Q(referencia__nombre__icontains=q))
         resultados["elementos"] = Elemento.objects.filter(Q(nombre__icontains=q))
 
     return render(request, "users/buscar.html", {"q": q, "resultados": resultados})

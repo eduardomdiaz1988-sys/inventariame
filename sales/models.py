@@ -1,7 +1,8 @@
+# sales/models.py
 from django.db import models
 from django.contrib.auth.models import User
-from clientes.models import Cliente
-from referencias.models import Referencia   # Importamos el modelo Referencia
+from referencias.models import Referencia
+import datetime
 
 class Venta(models.Model):
     referencia = models.ForeignKey(
@@ -11,15 +12,12 @@ class Venta(models.Model):
         blank=True,
         related_name="ventas"
     )
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
-    instalacion = models.IntegerField(default=0)     # horas o unidades
-    mantenimiento = models.IntegerField(default=0)   # horas o unidades
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ventas")
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name="ventas")
+    fecha = models.DateField(null=True, blank=True, default=datetime.date.today)
 
     class Meta:
         verbose_name = "Venta"
         verbose_name_plural = "Ventas"
 
     def __str__(self):
-        return f"{self.referencia} - {self.cliente}"
+        return f"{self.referencia} - {self.usuario} ({self.fecha})"

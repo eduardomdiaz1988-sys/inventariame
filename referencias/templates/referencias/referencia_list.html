@@ -9,6 +9,7 @@
     <tr>
       <th>Nombre</th>
       <th>Tipo</th>
+      <th>Valor</th>
       <th>Acciones</th>
     </tr>
   </thead>
@@ -17,6 +18,7 @@
     <tr>
       <td>{{ ref.nombre }}</td>
       <td>{{ ref.tipo.nombre }}</td>
+      <td>{% if ref.valor %}0 + {{ ref.valor }}{% else %}-{% endif %}</td>
       <td>
         <a href="{% url 'referencia_editar' ref.pk %}" class="btn btn-primary btn-sm">Editar</a>
         <a href="{% url 'referencia_eliminar' ref.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
@@ -24,11 +26,10 @@
     </tr>
     {% empty %}
     <tr>
-      <td colspan="3">No hay referencias registradas.</td>
+      <td colspan="5">No hay referencias registradas.</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
 {% endblock %}
-

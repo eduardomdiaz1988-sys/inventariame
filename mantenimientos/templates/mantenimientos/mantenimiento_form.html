@@ -3,7 +3,7 @@
 {% now "Y-m-d" as today %}
 
 {% block content_authenticated %}
-<h2>{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} mantenimiento</h2>
+<h2>{% if form.instance.pk %}Editar{% else %}Subir{% endif %} mantenimientos</h2>
 
 {# Errores globales y por campo #}
 {% if form.non_field_errors %}

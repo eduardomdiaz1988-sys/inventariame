@@ -1,20 +1,25 @@
 {% extends "base.html" %}
+
 {% block content_authenticated %}
-<h2>{{ titulo }}</h2>
-
-<form method="post" class="card p-3 shadow-sm">
-  {% csrf_token %}
-  {% for field in form %}
-    <div class="mb-3">
-      {{ field.label_tag }}
-      {{ field }}
-      {% if field.errors %}
-        <div class="text-danger small">{{ field.errors }}</div>
-      {% endif %}
+<div class="container mt-4">
+  <h2>{{ titulo }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="id_nombre">Nombre</label>
+      {{ form.nombre }}
     </div>
-  {% endfor %}
-
-  <button class="btn btn-danger">Guardar</button>
-  <a href="{% url 'oferta_list' %}" class="btn btn-secondary">Cancelar</a>
-</form>
+    <div class="form-group">
+      <label for="id_referencia">Referencia</label>
+      {{ form.referencia }}
+    </div>
+    <div class="form-group">
+      <label for="id_valor">Valor</label>
+      {{ form.valor }}
+      <small class="form-text text-muted">Solo se permiten: 0 + 3, 0 + 4, 0 + 5, 0 + 7, 0 + 10</small>
+    </div>
+    <button type="submit" class="btn btn-danger">Guardar</button>
+    <a href="{% url 'oferta_list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
 {% endblock %}

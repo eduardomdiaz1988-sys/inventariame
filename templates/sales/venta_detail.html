@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+<div class="container mt-4">
+  <h2>Detalle de Venta</h2>
+  <div class="card">
+    <div class="card-body">
+      <p><strong>Referencia:</strong> {{ venta.referencia }}</p>
+      <p><strong>Usuario:</strong> {{ venta.usuario }}</p>
+      <p><strong>Fecha:</strong> {{ venta.fecha }}</p>
+    </div>
+    <div class="card-footer">
+      <a href="{% url 'venta_update' venta.pk %}" class="btn btn-primary">Editar</a>
+      <a href="{% url 'venta_list' %}" class="btn btn-secondary">Volver al listado</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, date
 from django.contrib.auth.models import User, Group
 
 from clientes.models import Cliente
@@ -11,6 +11,8 @@ from referencias.models import Referencia, Tipo
 from sales.models import Venta
 from inventory.models import Elemento, Stock, Cantidad
 from users.models import PerfilUsuario
+from mantenimientos.models import Mantenimiento, ConfiguracionMantenimientos
+
 
 class Command(BaseCommand):
     help = "Carga datos de demo completos en la base de datos"
@@ -69,12 +71,30 @@ class Command(BaseCommand):
         ref2, _ = Referencia.objects.get_or_create(nombre="F210SP", tipo=tipo_servicio)
 
         # --- Ofertas ---
-        oferta1, _ = Oferta.objects.get_or_create(nombre="Pack de 3 Sensores Magneticos", referencia=ref1, tipo=tipo_producto, valor="0 + 7")
-        oferta2, _ = Oferta.objects.get_or_create(nombre="Pack Fast4 + Videocamara Arlo", referencia=ref2, tipo=tipo_servicio, valor="0 + 7")
+        oferta1, _ = Oferta.objects.get_or_create(
+            nombre="Pack de 3 Sensores Magneticos",
+            referencia=ref1,
+            tipo=tipo_producto,
+            valor="0 + 7"
+        )
+        oferta2, _ = Oferta.objects.get_or_create(
+            nombre="Pack Fast4 + Videocamara Arlo",
+            referencia=ref2,
+            tipo=tipo_servicio,
+            valor="0 + 7"
+        )
 
         # --- Clientes ---
-        cliente1, _ = Cliente.objects.get_or_create(nombre="Cliente Uno", telefono="600111222", usuario=user1)
-        cliente2, _ = Cliente.objects.get_or_create(nombre="Cliente Dos", telefono="600333444", usuario=user2)
+        cliente1, _ = Cliente.objects.get_or_create(
+            nombre="Cliente Uno",
+            telefono="600111222",
+            usuario=user1
+        )
+        cliente2, _ = Cliente.objects.get_or_create(
+            nombre="Cliente Dos",
+            telefono="600333444",
+            usuario=user2
+        )
 
         # --- Direcciones ---
         addr1, _ = Address.objects.get_or_create(
@@ -82,6 +102,7 @@ class Command(BaseCommand):
             address="Calle Mayor 1, Málaga",
             latitude=36.7213,
             longitude=-4.4214,
+            principal=True,
             user=user1,
             cliente=cliente1,
             defaults={"created_at": timezone.now()}
@@ -91,11 +112,13 @@ class Command(BaseCommand):
             address="Av. Andalucía 25, Sevilla",
             latitude=37.3891,
             longitude=-5.9845,
+            principal=True,
             user=user2,
             cliente=cliente2,
             defaults={"created_at": timezone.now()}
         )
 
+        # asignar dirección al cliente
         if not cliente1.direccion:
             cliente1.direccion = addr1
             cliente1.save(update_fields=["direccion"])
@@ -108,13 +131,23 @@ class Command(BaseCommand):
             cliente=cliente1,
             usuario=user1,
             referencia=ref1,
-            defaults={"precio": 1200, "instalacion": 200, "mantenimiento": 100}
+            defaults={
+                "precio": 1200,
+                "instalacion": 200,
+                "mantenimiento": 100,
+                "fecha": date.today()
+            }
         )
         venta2, _ = Venta.objects.get_or_create(
             cliente=cliente2,
             usuario=user2,
             referencia=ref2,
-            defaults={"precio": 500, "instalacion": 50, "mantenimiento": 50}
+            defaults={
+                "precio": 500,
+                "instalacion": 50,
+                "mantenimiento": 50,
+                "fecha": date.today()
+            }
         )
 
         # --- Citas ---
@@ -124,7 +157,6 @@ class Command(BaseCommand):
             Cita.objects.get_or_create(
                 cliente=cliente1 if i % 2 == 0 else cliente2,
                 usuario=user1 if i % 2 == 0 else user2,
-                direccion=addr1 if i % 2 == 0 else addr2,
                 fecha=fecha,
                 recordatorio=(i % 2 == 0),
                 estado=estados[i % len(estados)],
@@ -133,8 +165,18 @@ class Command(BaseCommand):
             )
 
         # --- Inventario ---
-        elem1, _ = Elemento.objects.get_or_create(nombre="Inversor Solar", estado="nuevo", tipo_identificador="INV-001", usuario=user1)
-        elem2, _ = Elemento.objects.get_or_create(nombre="Batería", estado="usado", tipo_identificador="BAT-002", usuario=user2)
+        elem1, _ = Elemento.objects.get_or_create(
+            nombre="Inversor Solar",
+            estado="nuevo",
+            tipo_identificador="INV-001",
+            usuario=user1
+        )
+        elem2, _ = Elemento.objects.get_or_create(
+            nombre="Batería",
+            estado="usado",
+            tipo_identificador="BAT-002",
+            usuario=user2
+        )
 
         Stock.objects.get_or_create(codigo_is="STK001", nombre="Stock Inversores", elemento=elem1, usuario=user1)
         Stock.objects.get_or_create(codigo_is="STK002", nombre="Stock Baterías", elemento=elem2, usuario=user2)
@@ -142,4 +184,23 @@ class Command(BaseCommand):
         Cantidad.objects.get_or_create(usuario=user1, elemento=elem1, defaults={"cantidad": 10})
         Cantidad.objects.get_or_create(usuario=user2, elemento=elem2, defaults={"cantidad": 5})
 
-        self.stdout.write(self.style.SUCCESS("Seed demo completado con contraseñas definidas, grupos, perfiles, usuarios, clientes, direcciones, citas, ofertas, ventas e inventario."))
+        # --- Mantenimientos ---
+        Mantenimiento.objects.get_or_create(usuario=user1, fecha=date.today(), defaults={"cantidad": 2})
+        Mantenimiento.objects.get_or_create(usuario=user2, fecha=date.today(), defaults={"cantidad": 3})
+
+        ConfiguracionMantenimientos.objects.get_or_create(
+            usuario=user1,
+            año=date.today().year,
+            mes=date.today().month,
+            defaults={"dias_festivos": 2}
+        )
+        ConfiguracionMantenimientos.objects.get_or_create(
+            usuario=user2,
+            año=date.today().year,
+            mes=date.today().month,
+            defaults={"dias_festivos": 1}
+        )
+
+        self.stdout.write(self.style.SUCCESS(
+            "Seed demo completado: usuarios, perfiles, clientes, direcciones, ventas, citas, inventario y mantenimientos."
+        ))

@@ -1,15 +1,24 @@
 {% extends "base.html" %}
 {% block content_authenticated %}
-
+ <div class="row g-3 mt-1 mb-3">
+    <a href="{% url 'mantenimiento_create' %}?fecha={{ today }}" class="btn btn-success">
+      Subir mantenimientos diarios
+    </a>
+  </div>
 {% include "./dashboard_kpis.html" %}
-{% include "./dashboard_produccion.html" %}
+<!-- Producción mensual + Extra en ventas en la misma fila -->
+<div class="row g-3 mt-3">
+  <div class="col-md-6">
+    {% include "./dashboard_produccion.html" %}
+  </div>
+  <div class="col-md-6">
+    {% include "./dashboard_ganancia_mensual.html" %}
+  </div>
+</div>
 
 <div class="row g-3 mt-1">
-  <div class="col-lg-6">
+  <div class="col-lg-12">
     {% include "./dashboard_citas.html" %}
-  </div>
-  <div class="col-lg-6">
-    {% include "./dashboard_clientes.html" %}
   </div>
 </div>
 

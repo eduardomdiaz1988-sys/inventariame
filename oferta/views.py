@@ -1,3 +1,4 @@
+# views.py
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Oferta
@@ -32,3 +33,8 @@ def oferta_eliminar(request, pk):
         oferta.delete()
         return redirect("oferta_list")
     return render(request, "oferta/oferta_confirm_delete.html", {"oferta": oferta})
+
+@login_required
+def oferta_detail(request, pk):
+    oferta = get_object_or_404(Oferta.objects.select_related("referencia", "referencia__tipo"), pk=pk)
+    return render(request, "oferta/oferta_detail.html", {"oferta": oferta})

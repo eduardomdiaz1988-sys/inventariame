@@ -5,22 +5,20 @@
   <a class="btn btn-danger" href="{% url 'venta_create' %}"><i class="bi bi-plus-lg me-1"></i>Nueva</a>
 </div>
 <table class="table">
-  <thead><tr><th>Referencia</th><th>Cliente</th><th>Usuario</th><th>Precio</th><th>Instalación</th><th>Mantenimiento</th><th class="text-end">Acciones</th></tr></thead>
+  <thead><tr><th>Referencia</th><th>Usuario</th><th>Fecha</th><th class="text-end">Acciones</th></tr></thead>
   <tbody>
     {% for obj in object_list %}
     <tr>
       <td>{{ obj.referencia }}</td>
-      <td>{{ obj.cliente }}</td>
       <td>{{ obj.usuario }}</td>
-      <td>{{ obj.precio }}</td>
-      <td>{{ obj.instalacion }}</td>
-      <td>{{ obj.mantenimiento }}</td>
+      <td>{{ obj.fecha }}</td>
       <td class="text-end">
         <a href="{% url 'venta_update' obj.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="{% url 'venta_detail' obj.pk %}" class="btn btn-sm btn-outline-info">Ver</a>
         <a href="{% url 'venta_delete' obj.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
       </td>
     </tr>
-    {% empty %}<tr><td colspan="7">Sin registros</td></tr>{% endfor %}
+    {% empty %}<tr><td colspan="4">Sin registros</td></tr>{% endfor %}
   </tbody>
 </table>
 {% endblock %}

@@ -1,5 +1,6 @@
+# models.py
 from django.db import models
-from referencias.models import Referencia, Tipo
+from referencias.models import Referencia
 
 class Oferta(models.Model):
     nombre = models.CharField(max_length=150)
@@ -9,15 +10,9 @@ class Oferta(models.Model):
         related_name="ofertas",
         default=1
     )
-    tipo = models.ForeignKey(
-        Tipo,
-        on_delete=models.CASCADE,
-        related_name="ofertas",
-        default=1
-    )
-    valor = models.CharField(
-        max_length=50,
-        help_text="Expresión como '0 + 7', '0 + 3', etc."
+    valor = models.IntegerField(
+        choices=[(3, "0 + 3"), (4, "0 + 4"), (5, "0 + 5"), (7, "0 + 7"), (10, "0 + 10")],
+        help_text="Selecciona uno de los valores permitidos"
     )
 
     class Meta:
@@ -26,4 +21,4 @@ class Oferta(models.Model):
         ordering = ["nombre"]
 
     def __str__(self):
-        return f"{self.nombre} ({self.tipo}) - {self.valor}"
+        return f"{self.nombre} ({self.referencia.tipo.nombre}) - 0 + {self.valor}"

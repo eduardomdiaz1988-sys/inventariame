@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content_authenticated %}
+<div class="container mt-4">
+  <h2>Detalle de Oferta</h2>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ oferta.nombre }}</h5>
+      <p class="card-text"><strong>Referencia:</strong> {{ oferta.referencia.nombre }}</p>
+      <p class="card-text"><strong>Tipo:</strong> {{ oferta.referencia.tipo.nombre }}</p>
+      <p class="card-text"><strong>Valor:</strong> 0 + {{ oferta.valor }}</p>
+    </div>
+    <div class="card-footer">
+      <a href="{% url 'oferta_editar' oferta.pk %}" class="btn btn-primary">Editar</a>
+      <a href="{% url 'oferta_list' %}" class="btn btn-secondary">Volver al listado</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
