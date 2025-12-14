@@ -3,7 +3,12 @@
 {% load static %}
 {% block content_authenticated %}
 <h2>Mantenimientos</h2>
-
+<!-- Mensaje motivador -->
+{% if mensaje_motivador %}
+<div class="alert alert-success mb-3">
+  {{ mensaje_motivador }}
+</div>
+{% endif %}
 <div class="d-flex justify-content-between mb-3">
   <div>
     <a href="{% url 'mantenimiento_create' %}?fecha={{ today }}" class="btn btn-success">

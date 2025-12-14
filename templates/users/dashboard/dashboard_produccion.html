@@ -1,0 +1,23 @@
+<div class="card border-0 mt-3">
+  <div class="card-header bg-white border-0 px-0"><h5 class="mb-0">Producción mensual</h5></div>
+  <div class="card-body px-0">
+    {% if mensaje_motivador %}
+    <div class="alert alert-success mb-3">
+      {{ mensaje_motivador }}
+    </div>
+    {% endif %}
+    <p><strong>Meta ajustada:</strong> {{ meta_mensual }} mantenimientos</p>
+    <p><strong>Producción actual:</strong> {{ produccion_total }}</p>
+    <p><strong>Cumplimiento:</strong> {{ cumplimiento }}%</p>
+    <div class="progress mb-2" style="height: 20px;">
+      <div class="progress-bar {% if cumplimiento >= 100 %}bg-success{% elif cumplimiento >= 75 %}bg-info{% else %}bg-warning{% endif %}" role="progressbar" style="width: {{ cumplimiento }}%;" aria-valuenow="{{ cumplimiento }}" aria-valuemin="0" aria-valuemax="100">
+        {{ cumplimiento }}%
+      </div>
+    </div>
+    {% if cumplimiento >= 100 %}
+    <div class="alert alert-warning mt-2">
+      🏅 ¡Has superado tu meta mensual! ¡Enhorabuena!
+    </div>
+    {% endif %}
+  </div>
+</div>

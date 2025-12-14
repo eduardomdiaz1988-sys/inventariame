@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content_authenticated %}
+
+{% include "./dashboard_kpis.html" %}
+{% include "./dashboard_produccion.html" %}
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-6">
+    {% include "./dashboard_citas.html" %}
+  </div>
+  <div class="col-lg-6">
+    {% include "./dashboard_clientes.html" %}
+  </div>
+</div>
+
+{% endblock %}

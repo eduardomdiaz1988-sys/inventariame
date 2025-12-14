@@ -6,7 +6,6 @@ from django.db.models import Sum
 from .models import Mantenimiento, ConfiguracionMantenimientos
 from .forms import MantenimientoForm, ConfiguracionForm
 import datetime, calendar, json
-
 class MantenimientoListView(LoginRequiredMixin, ListView):
     model = Mantenimiento
     template_name = "mantenimientos/mantenimiento_list.html"
@@ -19,6 +18,7 @@ class MantenimientoListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         qs = self.get_queryset()
         hoy = datetime.date.today()
+        ayer = hoy - datetime.timedelta(days=1)
 
         # Configuración de festivos persistente por usuario/mes
         config = ConfiguracionMantenimientos.objects.filter(
@@ -63,6 +63,21 @@ class MantenimientoListView(LoginRequiredMixin, ListView):
         dias = [m.fecha.strftime("%Y-%m-%d") for m in ultimos]
         cantidades = [m.cantidad for m in ultimos]
 
+        # --- Mensaje motivador dinámico ---
+        hoy_count = qs.filter(fecha=hoy).aggregate(Sum("cantidad"))["cantidad__sum"] or 0
+        ayer_count = qs.filter(fecha=ayer).aggregate(Sum("cantidad"))["cantidad__sum"] or 0
+
+        if hoy_count > 0:
+            if hoy_count > ayer_count:
+                mensaje = f"{self.request.user.first_name or self.request.user.username}, eres el mejor 💪. Hoy hiciste {hoy_count} mantenimientos, ¡superaste tu marca de ayer ({ayer_count})!"
+            elif hoy_count == ayer_count:
+                mensaje = f"{self.request.user.first_name or self.request.user.username}, ¡constancia total! Hoy hiciste {hoy_count} mantenimientos, igual que ayer."
+            else:
+                mensaje = f"{self.request.user.first_name or self.request.user.username}, hiciste {hoy_count} mantenimientos hoy, un poco menos que ayer ({ayer_count}). ¡Ánimo, mañana más!"
+        else:
+            mensaje = f"{self.request.user.first_name or self.request.user.username}, aún no registraste mantenimientos hoy. ¡Dale caña!"
+
+        # Actualizar contexto
         context.update({
             "today": hoy,
             "dias_festivos": dias_festivos,
@@ -73,8 +88,10 @@ class MantenimientoListView(LoginRequiredMixin, ListView):
             "extras": extras,
             "dias_json": json.dumps(dias),
             "cantidades_json": json.dumps(cantidades),
+            "mensaje_motivador": mensaje,
         })
         return context
+
 
 class MantenimientoDetailView(LoginRequiredMixin, DetailView):
     model = Mantenimiento

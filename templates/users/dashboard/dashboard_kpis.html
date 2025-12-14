@@ -1,0 +1,46 @@
+<div class="row g-3">
+  <div class="col-md-3">
+    <a href="{% url 'cliente_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-people icon"></i>
+        <div>
+          <div class="value">{{ clientes_total }}</div>
+          <div class="label">Clientes</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{% url 'cita_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-calendar-event icon"></i>
+        <div>
+          <div class="value">{{ proximas|length }}</div>
+          <div class="label">Citas próximas</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{% url 'mantenimiento_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-tools icon"></i>
+        <div>
+          <div class="value">{{ mantenimientos_mes }}</div>
+          <div class="label">Mantenimientos del mes</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{% url 'cantidad_list' %}" class="text-decoration-none">
+      <div class="card-kpi hover-kpi">
+        <i class="bi bi-exclamation-circle icon"></i>
+        <div>
+          <div class="value">{{ stock_bajo }}</div>
+          <div class="label">Stock bajo</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
