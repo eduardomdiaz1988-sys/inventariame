@@ -13,13 +13,13 @@ from django.contrib.auth.decorators import login_required
 # IMPORTANTE: importamos el modelo Festivo de la app agenda
 from agenda.models import Festivo
 
-
 class MantenimientoListView(LoginRequiredMixin, ListView):
     model = Mantenimiento
     template_name = "mantenimientos/mantenimiento_list.html"
     context_object_name = "mantenimientos"
 
     def get_queryset(self):
+        # ✅ Solo mantenimientos del usuario actual
         return Mantenimiento.objects.filter(usuario=self.request.user)
 
     def get_context_data(self, **kwargs):
@@ -33,9 +33,13 @@ class MantenimientoListView(LoginRequiredMixin, ListView):
             usuario=self.request.user, año=hoy.year, mes=hoy.month
         ).first()
 
-        # Conteo real de festivos (Agenda) para el mes vigente: solo L-V
-        festivos_mes = Festivo.objects.filter(fecha__year=hoy.year, fecha__month=hoy.month) \
-                                      .values_list("fecha", flat=True)
+        # ✅ Conteo real de festivos del usuario actual (solo L-V)
+        festivos_mes = Festivo.objects.filter(
+            usuario=self.request.user,  # <-- añadido
+            fecha__year=hoy.year,
+            fecha__month=hoy.month
+        ).values_list("fecha", flat=True)
+
         festivos_laborables = [f for f in festivos_mes if f.weekday() < 5]
         dias_festivos_real = len(festivos_laborables)
 
@@ -44,7 +48,10 @@ class MantenimientoListView(LoginRequiredMixin, ListView):
             dias_festivos = dias_festivos_real
             # Creamos config mínima sincronizada
             ConfiguracionMantenimientos.objects.create(
-                usuario=self.request.user, año=hoy.year, mes=hoy.month, dias_festivos=dias_festivos
+                usuario=self.request.user,
+                año=hoy.year,
+                mes=hoy.month,
+                dias_festivos=dias_festivos
             )
         else:
             dias_festivos = config.dias_festivos
@@ -91,7 +98,7 @@ class MantenimientoListView(LoginRequiredMixin, ListView):
         dias = [m.fecha.strftime("%Y-%m-%d") for m in ultimos]
         cantidades = [m.cantidad for m in ultimos]
 
-        # Mensaje motivador interno (puede reemplazarse por IA luego)
+        # Mensaje motivador interno
         hoy_count = qs.filter(fecha=hoy).aggregate(Sum("cantidad"))["cantidad__sum"] or 0
         ayer_count = qs.filter(fecha=ayer).aggregate(Sum("cantidad"))["cantidad__sum"] or 0
 
@@ -186,7 +193,7 @@ class ConfiguracionUpdateView(LoginRequiredMixin, UpdateView):
             usuario=self.request.user, año=hoy.year, mes=hoy.month
         )
         return obj
-
+    
 @login_required
 def configurar_festivos_view(request):
     if request.method == "POST":
@@ -196,35 +203,56 @@ def configurar_festivos_view(request):
             mes = form.cleaned_data["mes"]
             fechas = form.cleaned_data["fechas_lista"]
 
+            # ✅ borrar festivos del usuario en ese mes
+            Festivo.objects.filter(
+                usuario=request.user,
+                fecha__year=año,
+                fecha__month=mes
+            ).delete()
+
+            # ✅ crear nuevos festivos con usuario asignado
             creadas = 0
             for f in fechas:
-                _, created = Festivo.objects.get_or_create(fecha=f)
+                _, created = Festivo.objects.get_or_create(usuario=request.user, fecha=f)
                 if created:
                     creadas += 1
 
-            # Festivos del mes (solo L-V)
-            festivos_mes = Festivo.objects.filter(fecha__year=año, fecha__month=mes).values_list("fecha", flat=True)
+            # ✅ festivos del mes (solo L-V) del usuario actual
+            festivos_mes = Festivo.objects.filter(
+                usuario=request.user,
+                fecha__year=año,
+                fecha__month=mes
+            ).values_list("fecha", flat=True)
+
             festivos_laborables = [f for f in festivos_mes if f.weekday() < 5]
             total_festivos_lv = len(festivos_laborables)
 
+            # actualizar configuración de mantenimientos del usuario
             config, _ = ConfiguracionMantenimientos.objects.get_or_create(
                 usuario=request.user, año=año, mes=mes
             )
             config.dias_festivos = total_festivos_lv
             config.save(update_fields=["dias_festivos"])
 
-            messages.success(request, f"Festivos guardados (nuevos: {creadas}). Ajuste mensual (L-V): {total_festivos_lv}.")
+            messages.success(
+                request,
+                f"Festivos guardados (nuevos: {creadas}). Ajuste mensual (L-V): {total_festivos_lv}."
+            )
             return redirect("mantenimiento_list")
     else:
         hoy = datetime.date.today()
         form = FestivosConfigForm(initial={"año": hoy.year, "mes": hoy.month})
 
-    # Festivos ya guardados del mes inicial (para mostrar debajo)
+    # ✅ festivos ya guardados del mes inicial (solo del usuario)
     año = form.initial.get("año")
     mes = form.initial.get("mes")
-    existentes = Festivo.objects.filter(fecha__year=año, fecha__month=mes).order_by("fecha")
+    existentes = Festivo.objects.filter(
+        usuario=request.user,
+        fecha__year=año,
+        fecha__month=mes
+    ).order_by("fecha")
 
     return render(request, "mantenimientos/configuracion_festivos_form.html", {
-      "form": form,
-      "existentes": existentes,
+        "form": form,
+        "existentes": existentes,
     })

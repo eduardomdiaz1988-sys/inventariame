@@ -4,9 +4,17 @@
   <h2>Detalle de Venta</h2>
   <div class="card">
     <div class="card-body">
-      <p><strong>Referencia:</strong> {{ venta.referencia }}</p>
+      <p><strong>Oferta:</strong> {{ venta.oferta.nombre }}</p>
+      <p><strong>Valor:</strong> {{ venta.oferta.valor }}</p>
       <p><strong>Usuario:</strong> {{ venta.usuario }}</p>
       <p><strong>Fecha:</strong> {{ venta.fecha }}</p>
+      <p><strong>Mantenimiento Nº:</strong>
+        {% if venta.mantenimiento_numero %}
+          {{ venta.mantenimiento_numero }}
+        {% else %}
+          No asignado
+        {% endif %}
+      </p>
     </div>
     <div class="card-footer">
       <a href="{% url 'venta_update' venta.pk %}" class="btn btn-primary">Editar</a>

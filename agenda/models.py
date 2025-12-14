@@ -2,15 +2,21 @@
 from django.db import models
 from django.conf import settings
 
-
 class Festivo(models.Model):
-    fecha = models.DateField(unique=True)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="festivos"
+    )
+    fecha = models.DateField()
+    descripcion = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         ordering = ["fecha"]
+        unique_together = ("usuario", "fecha")  # ✅ cada usuario define sus propios festivos
 
     def __str__(self):
-        return f"{self.fecha}"
+        return f"{self.fecha} - {self.usuario.username}"
     
 class EventoAgenda(models.Model):
     TIPO_CHOICES = [

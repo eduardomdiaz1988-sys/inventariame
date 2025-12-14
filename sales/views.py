@@ -1,5 +1,3 @@
-# sales/views.py
-from decimal import Decimal
 from django.shortcuts import redirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
@@ -7,10 +5,9 @@ from django.urls import reverse_lazy
 from oferta.models import Oferta
 from .models import Venta
 from users.mixins import GroupVisibilityMixin, SameOwnerRequiredMixin
-from referencias.models import Referencia
 from django.utils import timezone
-from .models import Venta
 from mantenimientos.models import Produccion 
+from utils.ganancia import calcular_ganancia  # ✅ función común
 
 class VentaListView(GroupVisibilityMixin, ListView):
     model = Venta
@@ -19,36 +16,29 @@ class VentaListView(GroupVisibilityMixin, ListView):
 
 class VentaCreateView(GroupVisibilityMixin, CreateView):
     model = Venta
-    fields = ['referencia']
+    fields = ['oferta', 'mantenimiento_numero']   # ✅ añadimos el campo opcional
     template_name = "sales/form.html"
     success_url = reverse_lazy('venta_list')
     extra_context = {"titulo": "Nueva Venta"}
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields['referencia'].queryset = Referencia.objects.all().order_by("nombre")
-        form.fields['referencia'].label = "Referencia"
+        form.fields['oferta'].queryset = Oferta.objects.all().order_by("nombre")
+        form.fields['oferta'].label = "Oferta"
+        form.fields['mantenimiento_numero'].label = "Número de mantenimiento (opcional)"
         return form
 
     def form_valid(self, form):
         form.instance.usuario = self.request.user
         venta = form.save()
 
-        # --- Buscar oferta asociada a la referencia ---
-        oferta = Oferta.objects.filter(referencia=venta.referencia).first()
-        if oferta:
-            try:
-                numero = int(oferta.valor.split("+")[1].strip())
-            except Exception:
-                numero = 0
-        else:
-            numero = 0
+        # --- Usamos directamente la oferta seleccionada ---
+        numero = venta.oferta.valor if venta.oferta else 0
 
-        # --- Calcular ganancia como Decimal ---
-        base = Decimal(numero) * Decimal(20)
-        ganancia = base * Decimal("0.20")
+        # --- Calcular ganancia usando la función común ---
+        ganancia = calcular_ganancia(numero)
 
-        # --- Actualizar/crear GananciaMensual ---
+        # --- Actualizar/crear Producción mensual ---
         hoy = timezone.now().date()
         obj, created = Produccion.objects.get_or_create(
             usuario=self.request.user,
@@ -62,24 +52,28 @@ class VentaCreateView(GroupVisibilityMixin, CreateView):
 
         return redirect(self.success_url)
     
+
 class VentaUpdateView(SameOwnerRequiredMixin, UpdateView):
     model = Venta
-    fields = ['referencia']
+    fields = ['oferta', 'mantenimiento_numero']   # ✅ también aquí
     template_name = "sales/form.html"
     success_url = reverse_lazy('venta_list')
     extra_context = {"titulo": "Editar Venta"}
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields['referencia'].queryset = Referencia.objects.all().order_by("nombre")
-        form.fields['referencia'].label = "Referencia"
+        form.fields['oferta'].queryset = Oferta.objects.all().order_by("nombre")
+        form.fields['oferta'].label = "Oferta"
+        form.fields['mantenimiento_numero'].label = "Número de mantenimiento (opcional)"
         return form
+
 
 class VentaDeleteView(SameOwnerRequiredMixin, DeleteView):
     model = Venta
     template_name = "core/confirm_delete.html"
     success_url = reverse_lazy('venta_list')
     extra_context = {"titulo": "Eliminar Venta"}
+
 
 class VentaDetailView(GroupVisibilityMixin, DetailView):
     model = Venta

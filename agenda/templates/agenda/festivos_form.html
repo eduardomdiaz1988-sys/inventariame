@@ -1,11 +1,10 @@
-<!-- calendario/templates/calendario/festivos_form.html -->
 {% extends "base.html" %}
 {% load static %}
 
 {% block content_authenticated %}
 <h2>Seleccionar festivos del mes</h2>
 
-<form method="post" class="mt-3">
+<form method="post" id="festivosForm" class="mt-3">
   {% csrf_token %}
   <div class="mb-3">
     {{ form.año.label_tag }}
@@ -27,14 +26,11 @@
 <hr class="my-4">
 
 <h5>Festivos guardados en este mes</h5>
-<ul class="list-group">
+<ul class="list-group" id="festivosList">
   {% for f in existentes %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ f.pk }}">
       <span>{{ f.fecha }}</span>
-      <form method="post" action="{% url 'festivo_delete' f.pk %}">
-        {% csrf_token %}
-        <button class="btn btn-sm btn-outline-danger">Eliminar</button>
-      </form>
+      <button class="btn btn-sm btn-outline-danger btn-delete" data-id="{{ f.pk }}">Eliminar</button>
     </li>
   {% empty %}
     <li class="list-group-item">No hay festivos guardados para este mes.</li>
@@ -58,16 +54,46 @@
       const firstDay = new Date(año, mes - 1, 1);
       const lastDay = new Date(año, mes, 0);
 
+      // ✅ Preseleccionar festivos ya existentes
+      const existentes = {{ existentes_json|json_script:"festivos-json" }};
+      const defaultDates = existentes.map(f => f.fecha);
+
       flatpickr(input, {
         mode: "multiple",
         dateFormat: "Y-m-d",
-        defaultDate: input.value ? input.value.split(",") : [],
+        defaultDate: defaultDates,
         minDate: firstDay,
         maxDate: lastDay,
         onChange: function(selectedDates, dateStr, instance) {
           const formatted = selectedDates.map(d => instance.formatDate(d, "Y-m-d"));
           input.value = formatted.join(",");
         }
+      });
+
+      // ✅ AJAX eliminar festivo con actualización del calendario
+      document.querySelectorAll(".btn-delete").forEach(btn => {
+        btn.addEventListener("click", function(e) {
+          e.preventDefault();
+          const id = this.dataset.id;
+          fetch("{% url 'agenda:festivo_delete_ajax' 0 %}".replace("0", id), {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}",
+            }
+          }).then(resp => resp.json()).then(data => {
+            if (data.status === "ok") {
+              const item = document.querySelector(`li[data-id="${id}"]`);
+              item.remove();
+
+              // ✅ quitar fecha del input si estaba seleccionada
+              const fecha = data.fecha;
+              if (input && input.value) {
+                const fechas = input.value.split(",").filter(f => f !== fecha);
+                input.value = fechas.join(",");
+              }
+            }
+          });
+        });
       });
     });
   </script>

@@ -1,23 +1,14 @@
 # sales/models.py
 from django.db import models
-from django.contrib.auth.models import User
-from referencias.models import Referencia
-import datetime
+from django.conf import settings
+from oferta.models import Oferta
 
 class Venta(models.Model):
-    referencia = models.ForeignKey(
-        Referencia,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="ventas"
-    )
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ventas")
-    fecha = models.DateField(null=True, blank=True, default=datetime.date.today)
-
-    class Meta:
-        verbose_name = "Venta"
-        verbose_name_plural = "Ventas"
-
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    fecha = models.DateTimeField(auto_now_add=True)
+    oferta = models.ForeignKey(Oferta, on_delete=models.CASCADE, related_name="ventas")
+    cantidad = models.PositiveIntegerField(default=1)
+    mantenimiento_numero = models.IntegerField(null=True, blank=True, help_text="Número de mantenimiento asociado (opcional)")
+    
     def __str__(self):
-        return f"{self.referencia} - {self.usuario} ({self.fecha})"
+        return f"Venta {self.id} - {self.oferta.nombre}"

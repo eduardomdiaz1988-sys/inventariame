@@ -1,5 +1,6 @@
 # agenda/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView, View
 from django.http import JsonResponse
 from django.utils.timezone import make_aware
@@ -14,6 +15,51 @@ from django.db import IntegrityError
 from .forms import FestivosMesForm
 from .models import Festivo
 from django.views.decorators.http import require_POST
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from .forms import FestivoForm, FestivosMesForm
+class FestivoListView(LoginRequiredMixin, ListView):
+    model = Festivo
+    template_name = "agenda/festivo_list.html"
+
+    def get_queryset(self):
+        # ✅ Solo los festivos del usuario actual
+        return Festivo.objects.filter(usuario=self.request.user).order_by("fecha")
+
+
+class FestivoCreateView(LoginRequiredMixin, CreateView):
+    model = Festivo
+    form_class = FestivoForm
+    template_name = "agenda/festivo_form.html"
+    success_url = reverse_lazy("agenda:festivo_list")  # ✅ usa namespace
+
+    def form_valid(self, form):
+        # ✅ asignar siempre el usuario
+        form.instance.usuario = self.request.user
+        try:
+            return super().form_valid(form)
+        except Exception:
+            form.add_error("fecha", "Ya tienes un festivo en esta fecha.")
+            return self.form_invalid(form)
+
+
+class FestivoUpdateView(LoginRequiredMixin, UpdateView):
+    model = Festivo
+    form_class = FestivoForm
+    template_name = "agenda/festivo_form.html"
+    success_url = reverse_lazy("agenda:festivo_list")  # ✅ usa namespace
+
+    def get_queryset(self):
+        return Festivo.objects.filter(usuario=self.request.user)
+
+
+class FestivoDeleteView(LoginRequiredMixin, DeleteView):
+    model = Festivo
+    template_name = "core/confirm_delete.html"
+    success_url = reverse_lazy("agenda:festivo_list")  # ✅ usa namespace
+
+    def get_queryset(self):
+        return Festivo.objects.filter(usuario=self.request.user)
+
 
 @login_required
 def festivos_mes_view(request):
@@ -24,18 +70,32 @@ def festivos_mes_view(request):
             mes = form.cleaned_data["mes"]
             fechas = form.cleaned_data["fechas_lista"]
 
+            # ✅ Borrar todos los festivos del usuario en ese mes
+            Festivo.objects.filter(
+                usuario=request.user,
+                fecha__year=año,
+                fecha__month=mes
+            ).delete()
+
+            # ✅ Crear los nuevos seleccionados
             creadas = 0
             for f in fechas:
-                try:
-                    _, created = Festivo.objects.get_or_create(fecha=f)
-                    if created:
-                        creadas += 1
-                except IntegrityError:
-                    continue
+                festivo, created = Festivo.objects.get_or_create(
+                    usuario=request.user, fecha=f
+                )
+                if created:
+                    creadas += 1
 
-            total_mes = Festivo.objects.filter(fecha__year=año, fecha__month=mes).count()
-            messages.success(request, f"Festivos guardados. Nuevos: {creadas}. Total en {mes}/{año}: {total_mes}.")
-            return redirect("festivos_mes")
+            total_mes = Festivo.objects.filter(
+                usuario=request.user,
+                fecha__year=año,
+                fecha__month=mes
+            ).count()
+            messages.success(
+                request,
+                f"Festivos actualizados. Nuevos: {creadas}. Total en {mes}/{año}: {total_mes}."
+            )
+            return redirect("agenda:festivos_mes")  # ✅ usa namespace
     else:
         import datetime
         hoy = datetime.date.today()
@@ -44,26 +104,34 @@ def festivos_mes_view(request):
     año = form.initial.get("año") if not form.is_bound else form.data.get("año", form.initial.get("año"))
     mes = form.initial.get("mes") if not form.is_bound else form.data.get("mes", form.initial.get("mes"))
 
-    existentes = []
+    existentes_qs = []
+    existentes_json = []
     try:
         año_int = int(año)
         mes_int = int(mes)
-        existentes = Festivo.objects.filter(fecha__year=año_int, fecha__month=mes_int).order_by("fecha")
+        existentes_qs = Festivo.objects.filter(
+            usuario=request.user,
+            fecha__year=año_int,
+            fecha__month=mes_int
+        ).order_by("fecha")
+        existentes_json = list(existentes_qs.values("fecha"))
     except Exception:
         pass
 
     return render(request, "agenda/festivos_form.html", {
         "form": form,
-        "existentes": existentes,
+        "existentes": existentes_qs,        # para listado con botones
+        "existentes_json": existentes_json  # para calendario
     })
+
 
 @require_POST
 @login_required
 def festivo_delete_view(request, pk):
-    festivo = get_object_or_404(Festivo, pk=pk)
+    festivo = get_object_or_404(Festivo, pk=pk, usuario=request.user)
+    fecha = festivo.fecha.isoformat()
     festivo.delete()
-    messages.info(request, f"Festivo {festivo.fecha} eliminado.")
-    return redirect("festivos_mes")
+    return JsonResponse({"status": "ok", "deleted": pk, "fecha": fecha})
 
 class EventosApi(View):
     def get(self, request):

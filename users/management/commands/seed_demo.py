@@ -20,23 +20,19 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # --- Grupos ---
         grupo_group, _ = Group.objects.get_or_create(name="Grupo")
-        individual_group, _ = Group.objects.get_or_create(name="Individual")
+        Group.objects.get_or_create(name="Individual")
 
         # --- Usuarios demo ---
         admin, _ = User.objects.get_or_create(
             username="admin",
             defaults={"email": "admin@example.com", "is_staff": True, "is_superuser": True}
         )
-        user1, _ = User.objects.get_or_create(username="eduardo", defaults={"email": "eduardo@example.com"})
-        user2, _ = User.objects.get_or_create(username="maria", defaults={"email": "maria@example.com"})
 
         # --- Contraseñas demo ---
-        admin.set_password("admin123")
-        user1.set_password("eduardo123")
-        user2.set_password("maria123")
+        admin.set_password("Demo1234")
+
         admin.save()
-        user1.save()
-        user2.save()
+
 
         # --- Perfiles ---
         def ensure_profile(user, group_obj, tipo_usuario, nombre_grupo):
@@ -59,148 +55,14 @@ class Command(BaseCommand):
                 perfil.actualizado = timezone.now()
                 perfil.save()
 
-        ensure_profile(admin, grupo_group, "Grupo", "Administradores")
-        ensure_profile(user1, individual_group, "Individual", "Comerciales")
-        ensure_profile(user2, grupo_group, "Grupo", "Operaciones")
+        ensure_profile(admin, grupo_group, "Grupo", "Admin")
+        
 
         # --- Tipos y referencias ---
-        tipo_servicio, _ = Tipo.objects.get_or_create(nombre="Fast")
-        tipo_producto, _ = Tipo.objects.get_or_create(nombre="Moonshot")
+        Tipo.objects.get_or_create(nombre="Fast")
+        Tipo.objects.get_or_create(nombre="Moonshot")
 
-        ref1, _ = Referencia.objects.get_or_create(nombre="PX3MX", tipo=tipo_producto)
-        ref2, _ = Referencia.objects.get_or_create(nombre="F210SP", tipo=tipo_servicio)
-
-        # --- Ofertas ---
-        oferta1, _ = Oferta.objects.get_or_create(
-            nombre="Pack de 3 Sensores Magneticos",
-            referencia=ref1,
-            tipo=tipo_producto,
-            valor="0 + 7"
-        )
-        oferta2, _ = Oferta.objects.get_or_create(
-            nombre="Pack Fast4 + Videocamara Arlo",
-            referencia=ref2,
-            tipo=tipo_servicio,
-            valor="0 + 7"
-        )
-
-        # --- Clientes ---
-        cliente1, _ = Cliente.objects.get_or_create(
-            nombre="Cliente Uno",
-            telefono="600111222",
-            usuario=user1
-        )
-        cliente2, _ = Cliente.objects.get_or_create(
-            nombre="Cliente Dos",
-            telefono="600333444",
-            usuario=user2
-        )
-
-        # --- Direcciones ---
-        addr1, _ = Address.objects.get_or_create(
-            label="Casa Cliente Uno",
-            address="Calle Mayor 1, Málaga",
-            latitude=36.7213,
-            longitude=-4.4214,
-            principal=True,
-            user=user1,
-            cliente=cliente1,
-            defaults={"created_at": timezone.now()}
-        )
-        addr2, _ = Address.objects.get_or_create(
-            label="Oficina Cliente Dos",
-            address="Av. Andalucía 25, Sevilla",
-            latitude=37.3891,
-            longitude=-5.9845,
-            principal=True,
-            user=user2,
-            cliente=cliente2,
-            defaults={"created_at": timezone.now()}
-        )
-
-        # asignar dirección al cliente
-        if not cliente1.direccion:
-            cliente1.direccion = addr1
-            cliente1.save(update_fields=["direccion"])
-        if not cliente2.direccion:
-            cliente2.direccion = addr2
-            cliente2.save(update_fields=["direccion"])
-
-        # --- Ventas ---
-        venta1, _ = Venta.objects.get_or_create(
-            cliente=cliente1,
-            usuario=user1,
-            referencia=ref1,
-            defaults={
-                "precio": 1200,
-                "instalacion": 200,
-                "mantenimiento": 100,
-                "fecha": date.today()
-            }
-        )
-        venta2, _ = Venta.objects.get_or_create(
-            cliente=cliente2,
-            usuario=user2,
-            referencia=ref2,
-            defaults={
-                "precio": 500,
-                "instalacion": 50,
-                "mantenimiento": 50,
-                "fecha": date.today()
-            }
-        )
-
-        # --- Citas ---
-        estados = ["pendiente", "confirmada", "cancelada"]
-        for i in range(6):
-            fecha = timezone.now() + timedelta(days=i + 1, hours=9)
-            Cita.objects.get_or_create(
-                cliente=cliente1 if i % 2 == 0 else cliente2,
-                usuario=user1 if i % 2 == 0 else user2,
-                fecha=fecha,
-                recordatorio=(i % 2 == 0),
-                estado=estados[i % len(estados)],
-                oferta=oferta1 if i % 2 == 0 else oferta2,
-                venta=venta1 if i % 2 == 0 else venta2
-            )
-
-        # --- Inventario ---
-        elem1, _ = Elemento.objects.get_or_create(
-            nombre="Inversor Solar",
-            estado="nuevo",
-            tipo_identificador="INV-001",
-            usuario=user1
-        )
-        elem2, _ = Elemento.objects.get_or_create(
-            nombre="Batería",
-            estado="usado",
-            tipo_identificador="BAT-002",
-            usuario=user2
-        )
-
-        Stock.objects.get_or_create(codigo_is="STK001", nombre="Stock Inversores", elemento=elem1, usuario=user1)
-        Stock.objects.get_or_create(codigo_is="STK002", nombre="Stock Baterías", elemento=elem2, usuario=user2)
-
-        Cantidad.objects.get_or_create(usuario=user1, elemento=elem1, defaults={"cantidad": 10})
-        Cantidad.objects.get_or_create(usuario=user2, elemento=elem2, defaults={"cantidad": 5})
-
-        # --- Mantenimientos ---
-        Mantenimiento.objects.get_or_create(usuario=user1, fecha=date.today(), defaults={"cantidad": 2})
-        Mantenimiento.objects.get_or_create(usuario=user2, fecha=date.today(), defaults={"cantidad": 3})
-
-        ConfiguracionMantenimientos.objects.get_or_create(
-            usuario=user1,
-            año=date.today().year,
-            mes=date.today().month,
-            defaults={"dias_festivos": 2}
-        )
-        ConfiguracionMantenimientos.objects.get_or_create(
-            usuario=user2,
-            año=date.today().year,
-            mes=date.today().month,
-            defaults={"dias_festivos": 1}
-        )
-
+  
         self.stdout.write(self.style.SUCCESS(
             "Seed demo completado: usuarios, perfiles, clientes, direcciones, ventas, citas, inventario y mantenimientos."
         ))

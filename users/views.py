@@ -13,6 +13,30 @@ from citas.models import Cita
 from inventory.models import Elemento, Cantidad
 from sales.models import Venta
 from mantenimientos.models import Mantenimiento, ConfiguracionMantenimientos, Produccion
+from utils.ganancia import calcular_ganancia
+
+from .forms import RegistroBasicoForm  # asegúrate de tener este formulario definido
+
+def registro_basic_view(request):
+    if request.method == "POST":
+        form = RegistroBasicoForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("home")
+        else:
+            # Si el username ya existe, el error se mostrará en el template
+            return render(request, "users/registro_basic.html", {"form": form})
+    else:
+        form = RegistroBasicoForm()
+    return render(request, "users/registro_basic.html", {"form": form})
+
+
+
+
+
+
+
 @login_required
 def home_view(request):
     clientes_qs = Cliente.objects.filter(usuario=request.user)
@@ -37,20 +61,9 @@ def home_view(request):
     )
     ventas_mes = ventas_qs.count()
 
-    # --- Ganancia mensual calculada dinámicamente ---
-    def calcular_ganancia(valor):
-        if valor in [3, 4]:
-            return 12
-        elif valor == 5:
-            return 20
-        elif valor == 7:
-            return 28
-        elif valor == 10:
-            return 40
-        return 0
-
+   
     ganancia_mes = sum(
-        calcular_ganancia(v.referencia.valor) for v in ventas_qs if v.referencia and v.referencia.valor
+        calcular_ganancia(v.oferta.valor) for v in ventas_qs if v.oferta and v.oferta.valor
     )
 
     # --- Configuración de festivos ---
@@ -89,7 +102,7 @@ def home_view(request):
         "citas_total": citas_qs.count(),
         "mantenimientos_mes": mantenimientos_mes,
         "ventas_mes": ventas_mes,
-        "ganancia_mes": ganancia_mes,  # ✅ ahora calculada en tiempo real
+        "ganancia_mes": ganancia_mes,  # ✅ ahora usando Oferta.valor
         "stock_bajo": stock_qs.count(),
         "clientes": clientes_qs.order_by("nombre")[:10],
         "meta_mensual": meta_mensual,
@@ -100,6 +113,7 @@ def home_view(request):
     }
 
     return render(request, "users/dashboard/dashboard.html", context)
+
 
 @login_required
 def perfil_view(request):

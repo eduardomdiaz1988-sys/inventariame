@@ -2,6 +2,13 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
 
+class RegistroBasicoForm(UserCreationForm):
+    matricula = forms.CharField(max_length=20, required=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "password1", "password2", "matricula"]
+
 class RegistroForm(UserCreationForm):
     email = forms.EmailField(required=True)
     matricula = forms.CharField(max_length=50, required=False)

@@ -15,13 +15,7 @@ class Tipo(models.Model):
 class Referencia(models.Model):
     nombre = models.CharField(max_length=150)
     tipo = models.ForeignKey(Tipo, on_delete=models.CASCADE, related_name="referencias")
-    valor = models.IntegerField(
-        choices=[(3, "0 + 3"), (4, "0 + 4"), (5, "0 + 5"), (7, "0 + 7"), (10, "0 + 10")],
-        null=True,
-        blank=True,
-        help_text="Valor asociado a la referencia"
-    )
-
+ 
     class Meta:
         verbose_name = "Referencia"
         verbose_name_plural = "Referencias"

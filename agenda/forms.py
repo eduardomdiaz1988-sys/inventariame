@@ -1,6 +1,16 @@
 # calendario/forms.py
 from django import forms
 import datetime
+from .models import Festivo
+
+class FestivoForm(forms.ModelForm):
+    class Meta:
+        model = Festivo
+        fields = ["fecha", "descripcion"]
+        widgets = {
+            "fecha": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "descripcion": forms.TextInput(attrs={"class": "form-control", "placeholder": "Opcional"}),
+        }
 
 class FestivosMesForm(forms.Form):
     año = forms.IntegerField(min_value=2000, max_value=2100, label="Año")
