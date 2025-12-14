@@ -1,0 +1,117 @@
+<!-- mantenimientos/templates/mantenimientos/configuracion_festivos_form.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block content_authenticated %}
+<h2 class="mb-3">Configurar festivos del mes</h2>
+
+<form method="post" class="mt-3" id="festivos-form">
+  {% csrf_token %}
+
+  <div class="row g-3 mb-2">
+    <div class="col-md-3">
+      <label class="form-label">Año</label>
+      <input type="number" name="año" class="form-control" min="2000" max="2100" value="{{ form.año.value|default:form.initial.año }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Mes</label>
+      <input type="number" name="mes" class="form-control" min="1" max="12" value="{{ form.mes.value|default:form.initial.mes }}">
+    </div>
+    <div class="col-md-6 d-flex align-items-end">
+      <div class="alert alert-info w-100 mb-0">
+        <strong>Resumen:</strong> <span id="festivos-count">0</span> días seleccionados
+      </div>
+    </div>
+  </div>
+
+  <!-- Campo visual para abrir el calendario -->
+  <div class="mb-3">
+    <label class="form-label">Establecer festivos</label>
+    <input
+      type="text"
+      id="festivos-picker"
+      class="form-control"
+      placeholder="Pulsa para seleccionar días festivos"
+      autocomplete="off"
+    >
+    <div class="form-text">Selecciona uno o más días festivos. Se guardan sin duplicados.</div>
+  </div>
+
+  <!-- Campo oculto que el servidor usa (CSV YYYY-MM-DD) -->
+  <input type="hidden" name="fechas" id="fechas-hidden" value="{{ form.fechas.value|default:'' }}">
+
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Guardar y actualizar meta</button>
+    <a href="{% url 'mantenimiento_list' %}" class="btn btn-outline-secondary">Volver</a>
+  </div>
+</form>
+
+<hr class="my-4">
+
+<h5>Festivos guardados en este mes</h5>
+<ul class="list-group">
+  {% for f in existentes %}
+    <li class="list-group-item">{{ f.fecha }}</li>
+  {% empty %}
+    <li class="list-group-item">No hay festivos guardados para este mes.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const añoInput = document.querySelector('input[name="año"]');
+    const mesInput = document.querySelector('input[name="mes"]');
+    const pickerInput = document.getElementById("festivos-picker");
+    const hiddenInput = document.getElementById("fechas-hidden");
+    const countSpan = document.getElementById("festivos-count");
+
+    function clampMonthBounds() {
+      const año = parseInt(añoInput.value || new Date().getFullYear(), 10);
+      const mes = parseInt(mesInput.value || (new Date().getMonth() + 1), 10);
+      const firstDay = new Date(año, mes - 1, 1);
+      const lastDay = new Date(año, mes, 0);
+      return { año, mes, firstDay, lastDay };
+    }
+
+    let fp;
+    function initPicker() {
+      const { firstDay, lastDay } = clampMonthBounds();
+
+      if (fp) fp.destroy();
+
+      fp = flatpickr(pickerInput, {
+        locale: "es",
+        mode: "multiple",
+        dateFormat: "Y-m-d",
+        minDate: firstDay,
+        maxDate: lastDay,
+        allowInput: false,
+        // Si hay valores previos, precárgalos
+        defaultDate: hiddenInput.value ? hiddenInput.value.split(",") : [],
+        onChange: function (selectedDates, dateStr, instance) {
+          const formatted = selectedDates.map(d => instance.formatDate(d, "Y-m-d"));
+          hiddenInput.value = formatted.join(",");
+          countSpan.textContent = formatted.length;
+        }
+      });
+
+      // Actualiza contador al iniciar si hay valores
+      const initial = hiddenInput.value ? hiddenInput.value.split(",").filter(s => s) : [];
+      countSpan.textContent = initial.length;
+    }
+
+    // Inicializa el calendario
+    initPicker();
+
+    // Si cambia año/mes, re-limita el rango y reinicia el calendario
+    añoInput.addEventListener("change", initPicker);
+    mesInput.addEventListener("change", initPicker);
+  });
+</script>
+{% endblock %}

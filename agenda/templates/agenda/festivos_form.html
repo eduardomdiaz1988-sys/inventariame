@@ -1,4 +1,4 @@
-<!-- mantenimientos/templates/mantenimientos/configuracion_festivos_form.html -->
+<!-- calendario/templates/calendario/festivos_form.html -->
 {% extends "base.html" %}
 {% load static %}
 
@@ -18,9 +18,9 @@
   <div class="mb-3">
     {{ form.fechas.label_tag }}
     {{ form.fechas }}
-    <div class="form-text">Selecciona uno o más días festivos del mes (se guardan sin duplicados).</div>
+    <div class="form-text">Selecciona uno o más días festivos del mes.</div>
   </div>
-  <button type="submit" class="btn btn-primary">Guardar y actualizar meta</button>
+  <button type="submit" class="btn btn-primary">Guardar</button>
   <a href="{% url 'mantenimiento_list' %}" class="btn btn-outline-secondary">Volver</a>
 </form>
 
@@ -29,7 +29,13 @@
 <h5>Festivos guardados en este mes</h5>
 <ul class="list-group">
   {% for f in existentes %}
-    <li class="list-group-item">{{ f.fecha }}</li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <span>{{ f.fecha }}</span>
+      <form method="post" action="{% url 'festivo_delete' f.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+      </form>
+    </li>
   {% empty %}
     <li class="list-group-item">No hay festivos guardados para este mes.</li>
   {% endfor %}

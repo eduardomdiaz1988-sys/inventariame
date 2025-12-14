@@ -2,6 +2,16 @@
 from django.db import models
 from django.conf import settings
 
+
+class Festivo(models.Model):
+    fecha = models.DateField(unique=True)
+
+    class Meta:
+        ordering = ["fecha"]
+
+    def __str__(self):
+        return f"{self.fecha}"
+    
 class EventoAgenda(models.Model):
     TIPO_CHOICES = [
         ("cita", "Cita"),

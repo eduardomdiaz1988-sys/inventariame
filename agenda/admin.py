@@ -1,3 +1,8 @@
+# calendario/admin.py
 from django.contrib import admin
+from .models import Festivo
 
-# Register your models here.
+@admin.register(Festivo)
+class FestivoAdmin(admin.ModelAdmin):
+    list_display = ("fecha",)
+    search_fields = ("fecha",)

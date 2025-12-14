@@ -3,7 +3,7 @@ from django.urls import path
 from .views import (
     MantenimientoListView, MantenimientoDetailView,
     MantenimientoCreateView, MantenimientoUpdateView, MantenimientoDeleteView,
-    ConfiguracionUpdateView
+    configurar_festivos_view
 )
 
 urlpatterns = [
@@ -12,5 +12,6 @@ urlpatterns = [
     path("crear/", MantenimientoCreateView.as_view(), name="mantenimiento_create"),
     path("editar/<int:pk>/", MantenimientoUpdateView.as_view(), name="mantenimiento_update"),
     path("eliminar/<int:pk>/", MantenimientoDeleteView.as_view(), name="mantenimiento_delete"),
-    path("configuracion/", ConfiguracionUpdateView.as_view(), name="configuracion_update"),
+
+    path("festivos/", configurar_festivos_view, name="configurar_festivos"),
 ]
