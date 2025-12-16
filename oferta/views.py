@@ -6,6 +6,11 @@ from .forms import OfertaForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required
+# oferta/views_api.py
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.contrib.auth.decorators import login_required
+from oferta.models import Oferta
 
 @require_GET
 @login_required
@@ -14,11 +19,17 @@ def buscar_ofertas(request):
     if not q:
         return JsonResponse([], safe=False)
 
-    # Filtramos por nombre, limitamos para performance
-    ofertas = Oferta.objects.filter(nombre__icontains=q).order_by("nombre")[:20]
+    # Filtramos por nombre de oferta
+    ofertas = Oferta.objects.filter(nombre__icontains=q).select_related("referencia")[:20]
 
-    data = [{"id": o.id, "nombre": o.nombre} for o in ofertas]
+    data = []
+    for o in ofertas:
+        # ✅ Composición: nombre de la oferta + nombre de la referencia + valor
+        display = f"{o.nombre} - {o.referencia.nombre} - 0 + {o.valor}"
+        data.append({"id": o.id, "nombre": display})
+
     return JsonResponse(data, safe=False)
+
 
 @login_required
 def oferta_list(request):
