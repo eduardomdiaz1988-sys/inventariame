@@ -1,6 +1,8 @@
 # views.py
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+
+from referencias.models import Tipo
 from .models import Oferta
 from .forms import OfertaForm
 from django.http import JsonResponse
@@ -33,8 +35,36 @@ def buscar_ofertas(request):
 
 @login_required
 def oferta_list(request):
-    ofertas = Oferta.objects.select_related("referencia", "referencia__tipo").all()
-    return render(request, "oferta/oferta_list.html", {"ofertas": ofertas})
+    qs = Oferta.objects.select_related("referencia", "referencia__tipo").all()
+
+    nombre = request.GET.get("nombre", "").strip()
+    referencia = request.GET.get("referencia", "").strip()
+    tipo = request.GET.get("tipo", "").strip()
+    valor = request.GET.get("valor", "").strip()
+
+    if nombre:
+        qs = qs.filter(nombre__icontains=nombre)
+    if referencia:
+        qs = qs.filter(referencia__nombre__icontains=referencia)
+    if tipo:
+        qs = qs.filter(referencia__tipo__nombre__icontains=tipo)
+    if valor:
+        qs = qs.filter(valor=valor)
+
+    # ✅ lista de valores permitidos
+    valores = [3, 4, 5, 7, 10]
+    # ✅ obtenemos dinámicamente los tipos disponibles en la BD
+    tipos = Tipo.objects.values_list("nombre", flat=True)
+    
+    return render(
+        request,
+        "oferta/oferta_list.html",
+        {
+            "ofertas": qs,
+            "valores": valores,
+            "tipos": tipos,
+        },
+    )
 
 @login_required
 def oferta_nueva(request):
