@@ -107,12 +107,15 @@ document.addEventListener("DOMContentLoaded", () => {
         label ? `${label} — ${direccion}` : direccion || "—";
 
       document.getElementById("resFecha").textContent = fecha;
-      document.getElementById("resEstado").textContent =
-        document.getElementById("id_estado").value || "—";
       document.getElementById("resOferta").textContent =
         document.getElementById("id_oferta").value || "—";
-      document.getElementById("resRecordatorio").textContent =
-        document.getElementById("id_recordatorio").checked ? "Sí" : "No";
+
+      // NUEVO: número de instalación
+      const numeroInstalacionInput = document.getElementById("id_numero_instalacion");
+      if (numeroInstalacionInput) {
+        document.getElementById("resNumeroInstalacion").textContent =
+          numeroInstalacionInput.value || "0";
+      }
 
       cardCita.classList.add("d-none");
       cardResumen.classList.remove("d-none");

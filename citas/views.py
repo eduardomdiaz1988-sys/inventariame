@@ -12,6 +12,14 @@ from locations.models import Address
 class CitaListView(LoginRequiredMixin, ListView):
     model = Cita
     template_name = "citas/citas_list.html"
+from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
+from citas.models import Cita
+from citas.forms import CitaWithClientForm
+from clientes.models import Cliente
+from locations.models import Address
 
 class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
     model = Cita
@@ -36,6 +44,10 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
         3. Asignar cliente y usuario a la cita.
         4. Guardar la cita.
         """
+        # Valores por defecto
+        form.instance.recordatorio = False
+        form.instance.estado = "pendiente"
+
         cliente_id = self.request.POST.get("cliente")
         nombre = self.request.POST.get("nombre", "").strip()
         telefono = self.request.POST.get("telefono", "").strip()
@@ -53,7 +65,6 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
                 telefono=telefono if telefono else None,
                 usuario=self.request.user
             )
-
             # Dirección principal opcional
             if address and latitude and longitude:
                 try:
@@ -79,6 +90,11 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
             except Cliente.DoesNotExist:
                 form.add_error("cliente", "El cliente seleccionado no existe")
                 return self.form_invalid(form)
+
+        # 🚀 Validación final: aseguramos que siempre haya cliente
+        if not cliente:
+            form.add_error("cliente", "Debes seleccionar o crear un cliente")
+            return self.form_invalid(form)
 
         # Asignamos cliente y usuario a la cita
         form.instance.cliente = cliente
@@ -107,7 +123,7 @@ class CitaCreateView(LoginRequiredMixin, CreateView):
 
 class CitaUpdateView(LoginRequiredMixin, UpdateView):
     model = Cita
-    fields = ['cliente','fecha', 'recordatorio', 'venta', 'oferta', 'estado']  # añadido estado
+    fields = ['cliente','fecha', 'recordatorio','oferta', 'estado']  # añadido estado
     template_name = "citas/cita_form.html"
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Editar Cita"}

@@ -14,10 +14,10 @@ class Cita(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='citas')
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='citas')
     fecha = models.DateTimeField()
-    recordatorio = models.BooleanField(default=False)
-    venta = models.ForeignKey(Venta, on_delete=models.SET_NULL, null=True, blank=True, related_name='citas')
+    recordatorio = models.BooleanField(default=False,blank=True)
     oferta = models.ForeignKey(Oferta, on_delete=models.SET_NULL, null=True, blank=True, related_name='citas')
-    estado = models.CharField(max_length=20, choices=ESTADOS, default="pendiente")  # NUEVO
+    estado = models.CharField(max_length=20, choices=ESTADOS, default="pendiente",blank=True)
+    numero_instalacion = models.IntegerField(default=0)  # NUEVO CAMPO
 
     class Meta:
         verbose_name = "Cita"

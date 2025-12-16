@@ -14,13 +14,13 @@ class CitaWithClientForm(forms.ModelForm):
 
     class Meta:
         model = Cita
-        exclude = ["cliente", "usuario"]
-        fields = ["cliente", "fecha", "recordatorio", "oferta", "estado"]
+        # Usa SOLO fields (no mezcles con exclude)
+        fields = ["fecha", "oferta", "numero_instalacion"]
         widgets = {
-            "cliente": forms.HiddenInput(),  # lo rellena el JS en la vista completa
-            "recordatorio": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_recordatorio"}),
+            # cliente viene del input hidden de tu plantilla (paso 2), lo mantenemos oculto aquí también
+            "cliente": forms.HiddenInput(),
             "oferta": forms.Select(attrs={"class": "form-control", "id": "id_oferta"}),
-            "estado": forms.Select(attrs={"class": "form-control", "id": "id_estado"}),
+            "numero_instalacion": forms.NumberInput(attrs={"class": "form-control", "id": "id_numero_instalacion"}),
         }
 
 
@@ -37,11 +37,10 @@ class CitaForm(forms.ModelForm):
 
     class Meta:
         model = Cita
-        # 🔥 Quitamos 'direccion' porque NO existe en el modelo
-        fields = ["cliente", "fecha", "recordatorio", "oferta", "estado"]
+        # Usa SOLO fields. No incluimos recordatorio ni estado.
+        fields = ["cliente", "fecha", "oferta", "numero_instalacion"]
         widgets = {
             "cliente": forms.Select(attrs={"class": "form-control", "id": "id_cliente"}),
-            "recordatorio": forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_recordatorio"}),
             "oferta": forms.Select(attrs={"class": "form-control", "id": "id_oferta"}),
-            "estado": forms.Select(attrs={"class": "form-control", "id": "id_estado"}),
+            "numero_instalacion": forms.NumberInput(attrs={"class": "form-control", "id": "id_numero_instalacion"}),
         }

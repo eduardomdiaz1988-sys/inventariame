@@ -114,19 +114,15 @@
         {{ form.fecha|add_class:"form-control" }}
       </div>
 
-      <div class="form-check mb-3">
-        {{ form.recordatorio }}
-        {{ form.recordatorio.label_tag }}
-      </div>
-
       <div class="mb-3">
         {{ form.oferta.label_tag }}
         {{ form.oferta }}
       </div>
 
+      <!-- NUEVO CAMPO: número de instalación -->
       <div class="mb-3">
-        {{ form.estado.label_tag }}
-        {{ form.estado }}
+        {{ form.numero_instalacion.label_tag }}
+        {{ form.numero_instalacion|add_class:"form-control" }}
       </div>
 
       <button type="button" id="btnResumen" class="btn btn-danger">Continuar al resumen</button>
@@ -143,9 +139,8 @@
         <li class="list-group-item"><strong>Teléfono:</strong> <span id="resTelefono"></span></li>
         <li class="list-group-item"><strong>Dirección:</strong> <span id="resDireccion"></span></li>
         <li class="list-group-item"><strong>Fecha:</strong> <span id="resFecha"></span></li>
-        <li class="list-group-item"><strong>Estado:</strong> <span id="resEstado"></span></li>
         <li class="list-group-item"><strong>Oferta:</strong> <span id="resOferta"></span></li>
-        <li class="list-group-item"><strong>Recordatorio:</strong> <span id="resRecordatorio"></span></li>
+        <li class="list-group-item"><strong>Número de instalación:</strong> <span id="resNumeroInstalacion"></span></li>
       </ul>
       <!-- Botón final que envía todo el formulario -->
       <button type="submit" class="btn btn-success">Guardar cita</button>
