@@ -6,13 +6,11 @@
     </button>
   </div>
 
-  <!-- Formulario de búsqueda -->
-  <form class="d-flex align-items-center gap-2 flex-grow-1" method="get" action="{% url 'buscar' %}">
-    <input class="form-control form-control-sm" type="search" name="q" id="searchInput" placeholder="Buscar..." value="{{ request.GET.q }}">
-    <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-search"></i></button>
-    <button type="button" class="btn btn-outline-secondary btn-sm" id="micButton" title="Buscar por voz">
-      <i class="bi bi-mic"></i>
-    </button>
-  </form>
+  <!-- Botón centrado y ancho completo -->
+  <div class="w-100 text-center my-4">
+    <a href="{% url 'mantenimiento_create' %}?fecha={{ today }}" class="btn btn-success">
+      Subir mantenimientos diarios
+    </a>
+  </div>
 
 </nav>
