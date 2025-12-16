@@ -3,6 +3,22 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Oferta
 from .forms import OfertaForm
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.contrib.auth.decorators import login_required
+
+@require_GET
+@login_required
+def buscar_ofertas(request):
+    q = (request.GET.get("q") or "").strip()
+    if not q:
+        return JsonResponse([], safe=False)
+
+    # Filtramos por nombre, limitamos para performance
+    ofertas = Oferta.objects.filter(nombre__icontains=q).order_by("nombre")[:20]
+
+    data = [{"id": o.id, "nombre": o.nombre} for o in ofertas]
+    return JsonResponse(data, safe=False)
 
 @login_required
 def oferta_list(request):

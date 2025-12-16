@@ -9,6 +9,7 @@ class Venta(models.Model):
     oferta = models.ForeignKey(Oferta, on_delete=models.CASCADE, related_name="ventas")
     cantidad = models.PositiveIntegerField(default=1)
     mantenimiento_numero = models.IntegerField(null=True, blank=True, help_text="Número de mantenimiento asociado (opcional)")
+    ppa = models.BooleanField(default=False, help_text="Marcar si la venta ha convertido PPA")
     
     def __str__(self):
         return f"Venta {self.id} - {self.oferta.nombre}"

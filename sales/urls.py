@@ -7,4 +7,5 @@ urlpatterns = [
     path('ventas/<int:pk>/editar/', VentaUpdateView.as_view(), name='venta_update'),
     path('ventas/<int:pk>/eliminar/', VentaDeleteView.as_view(), name='venta_delete'),
     path('<int:pk>/', VentaDetailView.as_view(), name='venta_detail'),
+
 ]

@@ -1,14 +1,103 @@
 {% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
 {% block content_authenticated %}
 
-<h2>{{ titulo }}</h2>
+<h2 class="mb-4">{{ titulo }}</h2>
 
-<form method="post" class="card p-3 shadow-sm">
+<form method="post" class="card p-4 shadow-sm">
   {% csrf_token %}
-  {{ form.as_p }}
 
-  <button class="btn btn-danger">Guardar</button>
-  <a href="{% url 'venta_list' %}" class="btn btn-secondary">Cancelar</a>
+  <!-- Bloque: Oferta -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <strong>Seleccionar Oferta</strong>
+    </div>
+    <div class="card-body">
+      <label for="buscador_oferta" class="form-label">Buscar oferta por nombre</label>
+      <input type="text" id="buscador_oferta" class="form-control" placeholder="Ej. Sentinel">
+      <input type="hidden" id="id_oferta_hidden" name="oferta">
+      <div id="resultados_oferta" class="list-group mt-2"></div>
+    </div>
+  </div>
+
+  <!-- Bloque: Mantenimiento + PPA -->
+  <div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+      <strong>Detalles adicionales</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          {{ form.mantenimiento_numero.label_tag }}
+          {{ form.mantenimiento_numero|add_class:"form-control" }}
+        </div>
+        <div class="col-12 col-md-6 d-flex align-items-center">
+          <div class="form-check mt-2">
+            {{ form.ppa }}
+            {{ form.ppa.label_tag }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones -->
+  <div class="d-flex justify-content-between">
+    <button class="btn btn-success">
+      <i class="bi bi-check-circle"></i> Guardar
+    </button>
+    <a href="{% url 'venta_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-x-circle"></i> Cancelar
+    </a>
+  </div>
 </form>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const buscador = document.getElementById("buscador_oferta");
+  const resultados = document.getElementById("resultados_oferta");
+  const hiddenOferta = document.getElementById("id_oferta_hidden");
+
+  buscador.addEventListener("input", async (e) => {
+    const query = e.target.value;
+    if (query.length < 2) {
+      resultados.innerHTML = "";
+      hiddenOferta.value = "";
+      return;
+    }
+
+    try {
+      const response = await fetch(`/ofertas/api/buscar/?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+
+      resultados.innerHTML = "";
+      data.forEach(oferta => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "list-group-item list-group-item-action";
+        item.textContent = oferta.nombre;
+        item.addEventListener("click", () => {
+          buscador.value = oferta.nombre;
+          hiddenOferta.value = oferta.id;
+          resultados.innerHTML = "";
+        });
+        resultados.appendChild(item);
+      });
+
+      if (data.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "list-group-item";
+        empty.textContent = "Sin resultados";
+        resultados.appendChild(empty);
+      }
+    } catch (err) {
+      console.error("Error buscando oferta:", err);
+    }
+  });
+});
+</script>
 {% endblock %}

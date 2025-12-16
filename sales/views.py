@@ -9,14 +9,15 @@ from django.utils import timezone
 from mantenimientos.models import Produccion 
 from utils.ganancia import calcular_ganancia  # ✅ función común
 
+
+
 class VentaListView(GroupVisibilityMixin, ListView):
     model = Venta
     template_name = "sales/ventas_list.html"
 
-
 class VentaCreateView(GroupVisibilityMixin, CreateView):
     model = Venta
-    fields = ['oferta', 'mantenimiento_numero']   # ✅ añadimos el campo opcional
+    fields = ['oferta', 'mantenimiento_numero', 'ppa']   # ✅ añadimos ppa
     template_name = "sales/form.html"
     success_url = reverse_lazy('venta_list')
     extra_context = {"titulo": "Nueva Venta"}
@@ -26,6 +27,7 @@ class VentaCreateView(GroupVisibilityMixin, CreateView):
         form.fields['oferta'].queryset = Oferta.objects.all().order_by("nombre")
         form.fields['oferta'].label = "Oferta"
         form.fields['mantenimiento_numero'].label = "Número de mantenimiento (opcional)"
+        form.fields['ppa'].label = "¿Convertida a PPA?"
         return form
 
     def form_valid(self, form):
@@ -51,11 +53,11 @@ class VentaCreateView(GroupVisibilityMixin, CreateView):
             obj.save()
 
         return redirect(self.success_url)
-    
+
 
 class VentaUpdateView(SameOwnerRequiredMixin, UpdateView):
     model = Venta
-    fields = ['oferta', 'mantenimiento_numero']   # ✅ también aquí
+    fields = ['oferta', 'mantenimiento_numero', 'ppa']   # ✅ también aquí
     template_name = "sales/form.html"
     success_url = reverse_lazy('venta_list')
     extra_context = {"titulo": "Editar Venta"}
@@ -65,8 +67,8 @@ class VentaUpdateView(SameOwnerRequiredMixin, UpdateView):
         form.fields['oferta'].queryset = Oferta.objects.all().order_by("nombre")
         form.fields['oferta'].label = "Oferta"
         form.fields['mantenimiento_numero'].label = "Número de mantenimiento (opcional)"
+        form.fields['ppa'].label = "¿Convertida a PPA?"
         return form
-
 
 class VentaDeleteView(SameOwnerRequiredMixin, DeleteView):
     model = Venta
