@@ -11,7 +11,7 @@ from .models import Cita
 
 class CitaListView(LoginRequiredMixin, ListView):
     model = Cita
-    template_name = "citas/cita_list.html"
+    template_name = "citas/citas_list.html"
     context_object_name = "object_list"
 
     def get_queryset(self):
