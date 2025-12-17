@@ -61,9 +61,9 @@ def set_principal(request, pk):
 # --- Listado de clientes ---
 @login_required
 def cliente_list(request):
-    clientes = Cliente.objects.all()
+    # ✅ Solo clientes del usuario autenticado
+    clientes = Cliente.objects.filter(usuario=request.user)
     return render(request, "clientes/cliente_list.html", {"clientes": clientes})
-
 
 # --- Crear cliente ---
 @login_required

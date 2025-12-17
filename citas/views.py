@@ -135,7 +135,11 @@ class CitaDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Eliminar Cita"}
 
-class CitaDetailView(DetailView):
+class CitaDetailView(LoginRequiredMixin, DetailView):
     model = Cita
     template_name = "citas/cita_detail.html"
     context_object_name = "cita"
+
+    def get_queryset(self):
+        # ✅ Solo citas del usuario actual
+        return Cita.objects.filter(usuario=self.request.user)
