@@ -20,7 +20,7 @@ def copy_old_ventas(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("sales", "000X_last"),  # ajusta al último número
+        ("sales", "0003_venta_ppa"),  # ajusta al último número
     ]
     operations = [
         migrations.RunPython(copy_old_ventas),
