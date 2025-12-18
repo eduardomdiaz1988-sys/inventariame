@@ -1,4 +1,3 @@
-
 {% load widget_tweaks %}
 <form id="citaFormFinal" method="post" action="{% url 'cita_create_card' %}" class="p-2">
   {% csrf_token %}
@@ -114,9 +113,12 @@
         {{ form.fecha|add_class:"form-control" }}
       </div>
 
+      <!-- Buscador AJAX de ofertas -->
       <div class="mb-3">
-        {{ form.oferta.label_tag }}
-        {{ form.oferta }}
+        <label for="buscador_oferta" class="form-label">Oferta</label>
+        <input type="text" id="buscador_oferta" class="form-control" placeholder="Escribe nombre de la oferta">
+        <div id="resultados_oferta" class="list-group mt-2"></div>
+        <input type="hidden" id="id_oferta_hidden" name="oferta">
       </div>
 
       <!-- NUEVO CAMPO: número de instalación -->
@@ -149,3 +151,36 @@
   </div>
 
 </form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const buscador = document.getElementById("buscador_oferta");
+  const resultados = document.getElementById("resultados_oferta");
+  const hiddenOferta = document.getElementById("id_oferta_hidden");
+
+  buscador.addEventListener("input", function() {
+    const q = this.value;
+    if (q.length < 2) {
+      resultados.innerHTML = "";
+      return;
+    }
+    fetch(`/citas/buscar-ofertas/?q=${encodeURIComponent(q)}`)
+      .then(res => res.json())
+      .then(data => {
+        resultados.innerHTML = "";
+        data.forEach(oferta => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "list-group-item list-group-item-action";
+          item.textContent = `${oferta.nombre} (0 + ${oferta.valor})`;
+          item.onclick = () => {
+            buscador.value = oferta.nombre;
+            hiddenOferta.value = oferta.id;
+            resultados.innerHTML = "";
+          };
+          resultados.appendChild(item);
+        });
+      });
+  });
+});
+</script>

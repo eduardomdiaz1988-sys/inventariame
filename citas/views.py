@@ -7,7 +7,9 @@ from citas.forms import CitaWithClientForm
 from clientes.models import Cliente
 from locations.models import Address
 from .models import Cita
-
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from oferta.models import Oferta
 
 class CitaListView(LoginRequiredMixin, ListView):
     model = Cita
@@ -127,3 +129,12 @@ class CitaDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "core/confirm_delete.html"
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Eliminar Cita"}
+
+@login_required
+def buscar_ofertas(request):
+    q = request.GET.get("q", "").strip()
+    resultados = []
+    if q:
+        ofertas = Oferta.objects.filter(nombre__icontains=q)[:10]  # límite de resultados
+        resultados = [{"id": o.id, "nombre": o.nombre, "valor": o.valor} for o in ofertas]
+    return JsonResponse(resultados, safe=False)
