@@ -151,13 +151,14 @@
   </div>
 
 </form>
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const buscador = document.getElementById("buscador_oferta");
   const resultados = document.getElementById("resultados_oferta");
   const hiddenOferta = document.getElementById("id_oferta_hidden");
+  const btnResumen = document.getElementById("btnResumen");
 
+  // Buscador AJAX de ofertas
   buscador.addEventListener("input", function() {
     const q = this.value;
     if (q.length < 2) {
@@ -172,15 +173,34 @@ document.addEventListener("DOMContentLoaded", function() {
           const item = document.createElement("button");
           item.type = "button";
           item.className = "list-group-item list-group-item-action";
-          item.textContent = `${oferta.nombre} (0 + ${oferta.valor})`;
+          item.textContent = `${oferta.nombre} (${oferta.valor} €)`;
           item.onclick = () => {
             buscador.value = oferta.nombre;
-            hiddenOferta.value = oferta.id;
+            hiddenOferta.value = oferta.id;   // ✅ guardamos el id
             resultados.innerHTML = "";
           };
           resultados.appendChild(item);
         });
       });
+  });
+
+  // Validación antes de pasar al resumen
+  btnResumen.addEventListener("click", function() {
+    if (!hiddenOferta.value) {
+      alert("Debes seleccionar una oferta antes de continuar.");
+      return;
+    }
+    // Ocultamos paso 2 y mostramos paso 3
+    document.getElementById("card-cita").classList.add("d-none");
+    document.getElementById("card-resumen").classList.remove("d-none");
+
+    // Rellenamos el resumen
+    document.getElementById("resCliente").textContent = document.getElementById("id_nombre_hidden").value;
+    document.getElementById("resTelefono").textContent = document.getElementById("id_telefono_hidden").value;
+    document.getElementById("resDireccion").textContent = document.getElementById("id_address_hidden").value;
+    document.getElementById("resFecha").textContent = document.getElementById("id_fecha").value;
+    document.getElementById("resOferta").textContent = buscador.value;
+    document.getElementById("resNumeroInstalacion").textContent = document.getElementById("id_numero_instalacion").value;
   });
 });
 </script>
