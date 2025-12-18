@@ -1,45 +1,71 @@
 {% extends "base.html" %}
 {% block content_authenticated %}
-<div class="d-flex align-items-center justify-content-between mb-2">
+<div class="d-flex align-items-center justify-content-between mb-3">
   <h2 class="mb-0">Ventas</h2>
-  <a class="btn btn-danger" href="{% url 'venta_create' %}"><i class="bi bi-plus-lg me-1"></i>Nueva</a>
+  <a class="btn btn-danger" href="{% url 'venta_create' %}">
+    <i class="bi bi-plus-lg me-1"></i> Nueva
+  </a>
 </div>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Oferta</th>
-      <th>Valor</th>
-      
-      <th>Nº Mantenimiento</th>  {# ✅ nueva columna #}
-      <th>Fecha</th>
 
-      <th class="text-end">Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for obj in object_list %}
-    <tr>
-      <td>{{ obj.oferta.nombre }}</td>
-      <td>{{ obj.oferta.valor }}</td>
-      
-      
-      <td>
-        {% if obj.mantenimiento_numero %}
-          {{ obj.mantenimiento_numero }}
-        {% else %}
-          —
-        {% endif %}
-      </td>
-      <td>{{ obj.fecha }}</td>
-      <td class="text-end">
-        <a href="{% url 'venta_update' obj.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-        <a href="{% url 'venta_detail' obj.pk %}" class="btn btn-sm btn-outline-info">Ver</a>
-        <a href="{% url 'venta_delete' obj.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-      </td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="6">Sin registros</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Ofertas</th>
+          <th>Nº Mantenimiento</th>
+          <th>Fecha</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for obj in object_list %}
+        <tr>
+          <!-- Ofertas asociadas -->
+          <td>
+            {% if obj.venta_ofertas.all %}
+              {% for vo in obj.venta_ofertas.all %}
+                <span class="badge bg-primary me-1">
+                  {{ vo.oferta.nombre }} x{{ vo.cantidad }}
+                </span>
+              {% endfor %}
+            {% else %}
+              <span class="text-muted">Sin ofertas</span>
+            {% endif %}
+          </td>
+
+          <!-- Nº mantenimiento -->
+          <td>
+            {% if obj.mantenimiento_numero %}
+              {{ obj.mantenimiento_numero }}
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+
+          <!-- Fecha -->
+          <td>{{ obj.fecha|date:"Y-m-d H:i" }}</td>
+
+          <!-- Acciones -->
+          <td class="text-end">
+            <a href="{% url 'venta_detail' obj.pk %}" class="btn btn-sm btn-outline-info me-1">
+              <i class="bi bi-eye"></i> Ver
+            </a>
+            <a href="{% url 'venta_update' obj.pk %}" class="btn btn-sm btn-outline-primary me-1">
+              <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'venta_delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i> Eliminar
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center text-muted py-3">No hay ventas registradas</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
