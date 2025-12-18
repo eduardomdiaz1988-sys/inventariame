@@ -36,7 +36,6 @@ def registro_basic_view(request):
 
 
 
-
 @login_required
 def home_view(request):
     clientes_qs = Cliente.objects.filter(usuario=request.user)
@@ -61,10 +60,11 @@ def home_view(request):
     )
     ventas_mes = ventas_qs.count()
 
-   
-    ganancia_mes = sum(
-        calcular_ganancia(v.oferta.valor) for v in ventas_qs if v.oferta and v.oferta.valor
-    )
+    # --- Ganancia del mes (corregido) ---
+    ganancia_mes = 0
+    for v in ventas_qs:
+        for vo in v.venta_ofertas.all():
+            ganancia_mes += calcular_ganancia(vo.oferta.valor * vo.cantidad)
 
     # --- Configuración de festivos ---
     config = ConfiguracionMantenimientos.objects.filter(
@@ -102,7 +102,7 @@ def home_view(request):
         "citas_total": citas_qs.count(),
         "mantenimientos_mes": mantenimientos_mes,
         "ventas_mes": ventas_mes,
-        "ganancia_mes": ganancia_mes,  # ✅ ahora usando Oferta.valor
+        "ganancia_mes": ganancia_mes,  # ✅ ahora usando VentaOferta
         "stock_bajo": stock_qs.count(),
         "clientes": clientes_qs.order_by("nombre")[:10],
         "meta_mensual": meta_mensual,

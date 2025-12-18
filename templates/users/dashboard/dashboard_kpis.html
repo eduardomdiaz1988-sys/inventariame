@@ -13,16 +13,17 @@
   </div>
 
   <div class="col-md-3">
-    <a href="{% url 'venta_list' %}" class="text-decoration-none">   <!-- 👈 apuntamos a ventas -->
+    <a href="{% url 'venta_list' %}" class="text-decoration-none">
       <div class="card-kpi hover-kpi">
-        <i class="bi bi-cash-stack icon"></i>   <!-- 👈 icono distinto -->
+        <i class="bi bi-cash-stack icon"></i>
         <div>
-          <div class="value">{{ ventas_mes }}</div>   <!-- 👈 variable correcta -->
+          <div class="value">{{ ventas_mes }}</div>
           <div class="label">Ventas del mes</div>
         </div>
       </div>
     </a>
   </div>
+
 
   <div class="col-md-3">
     <a href="{% url 'cita_list' %}" class="text-decoration-none">
