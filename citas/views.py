@@ -47,6 +47,7 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
+        # valores por defecto
         form.instance.recordatorio = False
         form.instance.estado = "pendiente"
 
@@ -60,6 +61,7 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
 
         cliente = None
 
+        # caso: cliente nuevo
         if not cliente_id and nombre:
             cliente = Cliente.objects.create(
                 nombre=nombre,
@@ -93,15 +95,18 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
             form.add_error("cliente", "Debes seleccionar o crear un cliente")
             return self.form_invalid(form)
 
+        # asignamos cliente y usuario
         form.instance.cliente = cliente
         form.instance.usuario = self.request.user
 
+        # ✅ observaciones ya se guarda automáticamente desde el formulario
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["GOOGLE_MAPS_API_KEY"] = settings.GOOGLE_MAPS_API_KEY
         return context
+
 
 
 class CitaCreateView(LoginRequiredMixin, CreateView):

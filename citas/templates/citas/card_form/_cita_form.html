@@ -127,6 +127,11 @@
         {{ form.numero_instalacion|add_class:"form-control" }}
       </div>
 
+      <div class="mb-3">
+        {{ form.observaciones.label_tag }}
+        {{ form.observaciones }}
+      </div>
+
       <button type="button" id="btnResumen" class="btn btn-danger">Continuar al resumen</button>
       <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
     </div>
@@ -143,6 +148,7 @@
         <li class="list-group-item"><strong>Fecha:</strong> <span id="resFecha"></span></li>
         <li class="list-group-item"><strong>Oferta:</strong> <span id="resOferta"></span></li>
         <li class="list-group-item"><strong>Número de instalación:</strong> <span id="resNumeroInstalacion"></span></li>
+        <li class="list-group-item"><strong>Observaciones:</strong> <span id="resObservaciones"></span></li>
       </ul>
       <!-- Botón final que envía todo el formulario -->
       <button type="submit" class="btn btn-success">Guardar cita</button>
@@ -201,6 +207,8 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("resFecha").textContent = document.getElementById("id_fecha").value;
     document.getElementById("resOferta").textContent = buscador.value;
     document.getElementById("resNumeroInstalacion").textContent = document.getElementById("id_numero_instalacion").value;
+    document.getElementById("resObservaciones").textContent = document.getElementById("id_observaciones").value;
+
   });
 });
 </script>

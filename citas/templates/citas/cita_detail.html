@@ -38,11 +38,17 @@
     <dt class="col-sm-3">Venta asociada</dt>
     <dd class="col-sm-9">{{ cita.venta|default:"-" }}</dd>
 
-    <!-- NUEVO CAMPO -->
     <dt class="col-sm-3">Número de instalación</dt>
     <dd class="col-sm-9">{{ cita.numero_instalacion|default:"0" }}</dd>
+
+    <!-- NUEVO CAMPO: Observaciones -->
+    <dt class="col-sm-3">Observaciones</dt>
     <dd class="col-sm-9">
-      
+      {% if cita.observaciones %}
+        {{ cita.observaciones|linebreaks }}
+      {% else %}
+        -
+      {% endif %}
     </dd>
   </dl>
 

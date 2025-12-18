@@ -18,7 +18,8 @@ class Cita(models.Model):
     oferta = models.ForeignKey(Oferta, on_delete=models.SET_NULL, null=True, blank=True, related_name='citas')
     estado = models.CharField(max_length=20, choices=ESTADOS, default="pendiente",blank=True)
     numero_instalacion = models.IntegerField(default=0)  # NUEVO CAMPO
-
+    observaciones = models.TextField(blank=True, null=True) 
+    
     class Meta:
         verbose_name = "Cita"
         verbose_name_plural = "Citas"
