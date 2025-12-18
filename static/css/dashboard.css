@@ -3,6 +3,9 @@
   width: 260px; 
   min-height: 100vh; 
   transition: transform 0.3s ease; 
+  background-color: #8a0000;
+  color: #fff;
+  padding-top: 1rem;
 }
 .logo-img { 
   height: 32px; 
@@ -15,33 +18,70 @@
 
 /* === Links sidebar === */
 .sidebar .nav-link { 
-  padding: .25rem 0; 
+  padding: 0.5rem 1rem; 
   opacity: .95; 
   display: block; 
   width: 100%; 
+  font-weight: 500;
+  color: #fff;
+  border-radius: 6px;
 }
 .sidebar .nav-link:hover { 
   opacity: 1; 
-  text-decoration: underline; 
+  background-color: rgba(255,255,255,0.1);
+  text-decoration: none;
 }
 
 /* === Cards (dashboard) === */
 .card-kpi {
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  padding: 1.2rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease-in-out;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
-.card-kpi .icon { font-size: 2rem; color: #dc3545; }
-.card-kpi .value { font-size: 1.5rem; font-weight: bold; color: #212529; }
-.card-kpi .label { font-size: 0.9rem; color: #6c757d; }
+.card-kpi .icon { font-size: 2.2rem; color: #dc3545; }
+.card-kpi .value { font-size: 1.8rem; font-weight: 600; color: #212529; }
+.card-kpi .label { font-size: 0.95rem; color: #6c757d; }
 .hover-card:hover { background-color: #f8f9fa; transform: scale(1.02); }
-.hover-kpi:hover { transform: scale(1.03); background-color: #f8f9fa; }
+.hover-kpi:hover { transform: scale(1.04); box-shadow: 0 6px 16px rgba(0,0,0,0.12); background-color: #f8f9fa; }
+
+/* === Secciones del dashboard === */
+.card-header {
+  background-color: #f1f3f5;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #343a40;
+}
+.card-body {
+  background-color: #ffffff;
+}
+
+/* === Ganancia mensual === */
+.ganancia-box {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #212529;
+  padding: 0.5rem 0;
+}
+
+/* === Barra de progreso === */
+.progress {
+  height: 20px;
+  border-radius: 10px;
+  background-color: #e9ecef;
+}
+.progress-bar {
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 20px;
+  border-radius: 10px;
+}
 
 /* === Dark mode === */
 :root[data-theme="dark"] body { background: #1f1f1f; color: #eee; }
@@ -108,8 +148,6 @@
 
 /* === Citas según estado === */
 .cita-row { cursor: pointer; transition: background-color 0.2s ease; }
-
-/* Hover general (fallback) */
 .cita-row:hover td { background-color: #f1f1f1 !important; }
 
 /* Anular el box-shadow de Bootstrap para permitir colores personalizados */
@@ -122,26 +160,25 @@
 
 /* Colores por estado base */
 .table-hover tbody tr.cita-completada > td {
-  background-color: #d4edda !important;  /* verde claro */
+  background-color: #d4edda !important;
   color: #155724;
 }
 .table-hover tbody tr.cita-pendiente > td {
-  background-color: #fff8e1 !important;  /* amarillo claro */
+  background-color: #fff8e1 !important;
   color: #856404;
 }
-/* Condición especial: cita de hoy y pendiente → azul */
 .table-hover tbody tr.cita-hoy.cita-pendiente > td {
-  background-color: #e0f0ff !important;  /* azul claro */
+  background-color: #e0f0ff !important;
   color: #004085;
 }
 
 /* Hovers más oscuros por estado */
 .table-hover tbody tr.cita-completada:hover > td {
-  background-color: #c3e6cb !important;  /* verde más intenso */
+  background-color: #c3e6cb !important;
 }
 .table-hover tbody tr.cita-pendiente:hover > td {
-  background-color: #ffe08a !important;  /* amarillo más intenso */
+  background-color: #ffe08a !important;
 }
 .table-hover tbody tr.cita-hoy.cita-pendiente:hover > td {
-  background-color: #b8daff !important;  /* azul más intenso */
+  background-color: #b8daff !important;
 }

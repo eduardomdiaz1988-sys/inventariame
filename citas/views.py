@@ -10,6 +10,16 @@ from .models import Cita
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from oferta.models import Oferta
+from django.shortcuts import render, get_object_or_404
+
+
+def cita_cliente_detail(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk, usuario=request.user)
+    citas = Cita.objects.filter(cliente=cliente, usuario=request.user).order_by("fecha")
+    return render(request, "citas/cita_detail.html", {
+        "cliente": cliente,
+        "citas": citas,
+    })
 
 class CitaListView(LoginRequiredMixin, ListView):
     model = Cita

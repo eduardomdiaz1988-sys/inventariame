@@ -6,7 +6,12 @@
       <tbody>
         {% for obj in clientes %}
         <tr>
-          <td>{{ obj.nombre }}</td>
+          <td>
+            <!-- Enlace al listado de citas de ese cliente -->
+            <a href="{% url 'cita_cliente_detail' obj.pk %}" class="text-decoration-none">
+              {{ obj.nombre }}
+            </a>
+          </td>
           <td class="text-end">
             <a href="{% url 'cliente_update' obj.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
             <a href="{% url 'cliente_delete' obj.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
