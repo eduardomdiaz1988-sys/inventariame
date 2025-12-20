@@ -13,7 +13,7 @@ from citas.models import Cita
 from inventory.models import Elemento, Cantidad
 from sales.models import Venta
 from mantenimientos.models import Mantenimiento, ConfiguracionMantenimientos, Produccion
-from utils.ganancia import calcular_ganancia
+from utils.ganancia import calcular_ganancia, calcular_ganancia_total
 
 from .forms import RegistroBasicoForm  # asegúrate de tener este formulario definido
 
@@ -53,6 +53,7 @@ def home_view(request):
     mantenimientos_mes = mantenimientos_qs.aggregate(Sum("cantidad"))["cantidad__sum"] or 0
 
     # --- Ventas del mes ---
+    # --- Ventas del mes ---
     ventas_qs = Venta.objects.filter(
         usuario=request.user,
         fecha__year=hoy.year,
@@ -61,10 +62,7 @@ def home_view(request):
     ventas_mes = ventas_qs.count()
 
     # --- Ganancia del mes (corregido) ---
-    ganancia_mes = 0
-    for v in ventas_qs:
-        for vo in v.venta_ofertas.all():
-            ganancia_mes += calcular_ganancia(vo.oferta.valor * vo.cantidad)
+    ganancia_mes = sum(calcular_ganancia_total(v) for v in ventas_qs)
 
     # --- Configuración de festivos ---
     config = ConfiguracionMantenimientos.objects.filter(

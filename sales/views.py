@@ -68,7 +68,12 @@ class VentaUpdateView(SameOwnerRequiredMixin, UpdateView):
     fields = ['mantenimiento_numero', 'ppa']
     template_name = "sales/form.html"
     success_url = reverse_lazy('venta_list')
-    extra_context = {"titulo": "Editar Venta"}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["titulo"] = "Editar Venta"
+        context["ofertas_existentes"] = self.object.venta_ofertas.select_related("oferta").all()
+        return context
 
     def form_valid(self, form):
         venta = form.save()
@@ -108,7 +113,6 @@ class VentaUpdateView(SameOwnerRequiredMixin, UpdateView):
             obj.save()
 
         return redirect(self.success_url)
-
 
 class VentaDeleteView(SameOwnerRequiredMixin, DeleteView):
     model = Venta

@@ -20,10 +20,16 @@
         <button type="button" id="btnAgregarOferta" class="btn btn-outline-success">+</button>
       </div>
       <div id="resultados_oferta" class="list-group mt-2"></div>
-
       <!-- Listado dinámico de ofertas seleccionadas -->
       <div id="ofertas_seleccionadas" class="mt-3">
-        <!-- aquí se irán añadiendo las ofertas con cantidad -->
+        {% for vo in ofertas_existentes %}
+        <div class="input-group mb-2" id="oferta_{{ vo.oferta.id }}">
+          <span class="input-group-text">{{ vo.oferta.nombre }}</span>
+          <input type="hidden" name="ofertas[]" value="{{ vo.oferta.id }}">
+          <input type="number" name="cantidad[]" value="{{ vo.cantidad }}" min="1" class="form-control" style="max-width:100px;">
+          <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">x</button>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
