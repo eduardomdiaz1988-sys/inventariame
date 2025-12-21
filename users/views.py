@@ -37,7 +37,6 @@ def registro_basic_view(request):
 
 
 
-
 @login_required
 def home_view(request):
     clientes_qs = Cliente.objects.filter(usuario=request.user)
@@ -55,7 +54,6 @@ def home_view(request):
     mantenimientos_mes = mantenimientos_qs.aggregate(Sum("cantidad"))["cantidad__sum"] or 0
 
     # --- Ventas del mes ---
-    # --- Ventas del mes ---
     ventas_qs = Venta.objects.filter(
         usuario=request.user,
         fecha__year=hoy.year,
@@ -63,8 +61,17 @@ def home_view(request):
     )
     ventas_mes = ventas_qs.count()
 
-    # --- Ganancia del mes (corregido) ---
+    # --- Ganancia del mes ---
     ganancia_mes = sum(calcular_ganancia_total(v) for v in ventas_qs)
+
+    # --- Ventas del día ---
+    ventas_hoy_qs = Venta.objects.filter(
+        usuario=request.user,
+        fecha__date=hoy
+    )
+
+    # --- Ganancia del día ---
+    ganancia_dia = sum(calcular_ganancia_total(v) for v in ventas_hoy_qs)
 
     # --- Configuración de festivos ---
     config = ConfiguracionMantenimientos.objects.filter(
@@ -102,7 +109,8 @@ def home_view(request):
         "citas_total": citas_qs.count(),
         "mantenimientos_mes": mantenimientos_mes,
         "ventas_mes": ventas_mes,
-        "ganancia_mes": ganancia_mes,  # ✅ ahora usando VentaOferta
+        "ganancia_mes": ganancia_mes,
+        "ganancia_dia": ganancia_dia,   # 👈 NUEVO
         "stock_bajo": stock_qs.count(),
         "clientes": clientes_qs.order_by("nombre")[:10],
         "meta_mensual": meta_mensual,

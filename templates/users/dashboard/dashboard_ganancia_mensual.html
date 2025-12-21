@@ -1,12 +1,15 @@
-<div class="col-md-6 d-flex align-items-stretch">
-  <div class="card shadow-sm w-100 text-center">
-    <div class="card-header">
-      <h5 class="mb-0">Extras </h5>
-    </div>
-    <div class="card-body d-flex flex-column justify-content-center">
-      <div class="ganancia-box">
-        {{ ganancia_mes|default:"0" }} €
-      </div>
-    </div>
+<div class="ganancia-box text-center ">
+
+  <div class="mb-2">
+    Extras del día:<br>
+    {{ ganancia_dia|default:"0" }} €
   </div>
+
+  <hr>
+
+  <div class="mt-2">
+    <strong>Total del mes:</strong><br>
+    {{ ganancia_mes|default:"0" }} €
+  </div>
+
 </div>
