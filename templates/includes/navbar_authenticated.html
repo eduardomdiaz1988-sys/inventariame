@@ -1,16 +1,23 @@
 <nav class="navbar bg-light border-bottom px-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-  <!-- Botones visibles solo en móvil -->
+  <!-- Botón lateral (solo móvil) -->
   <div class="d-flex d-lg-none gap-2">
     <button class="btn btn-outline-danger btn-sm" id="sidebarToggle">
-      <i class="bi bi-list"></i>
+       <i class="bi bi-box-seam fs-4 text-danger"></i>
+    <span class="fw-bold text-danger">Inventariame</span>
     </button>
   </div>
 
-  <!-- Botón centrado y ancho completo -->
-  <div class="w-100 text-center my-4">
-    <a href="{% url 'mantenimiento_create' %}?fecha={{ today }}" class="btn btn-success">
-      Subir mantenimientos diarios
-    </a>
+  <!-- Navegación principal (oculta en móvil) -->
+  <div class="d-none d-lg-flex gap-3">
+    <a href="{% url 'home' %}" class="nav-link text-dark">Inicio</a>
+    <a href="{% url 'cita_list' %}" class="nav-link text-dark">Agenda</a>
+    <a href="{% url 'mantenimiento_list' %}" class="nav-link text-dark">Producción</a>
+    <a href="{% url 'stock_list' %}" class="nav-link text-dark">Inventario</a>
   </div>
 
+  <!-- Usuario / sesión -->
+  <div class="d-flex align-items-center gap-2">
+    <span class="text-muted small">Hola, {{ user.first_name }}</span>
+    <a href="{% url 'logout' %}" class="btn btn-outline-secondary btn-sm">Salir</a>
+  </div>
 </nav>
