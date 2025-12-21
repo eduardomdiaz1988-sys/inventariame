@@ -38,8 +38,10 @@
       <td>{{ obj.fecha|localtime|date:"Y-m-d H:i" }}</td>
       <td>{{ obj.recordatorio|yesno:"Sí,No" }}</td>
       <td>
-        {% if obj.oferta %}
-          {{ obj.oferta.nombre }} ({{ obj.oferta.valor }})
+        {% if obj.cita_ofertas.all %}
+          {% for co in obj.cita_ofertas.all %}
+            {{ co.oferta.nombre }} x{{ co.cantidad }}<br>
+          {% endfor %}
         {% else %}
           -
         {% endif %}

@@ -19,17 +19,28 @@ class CitaWithClientForm(forms.ModelForm):
         fields = [
             "fecha",
             "estado",
-            "oferta",
             "recordatorio",
-            # cliente y dirección se pasan como hidden
+            "numero_instalacion",
+            "observaciones",
+
+            # cliente y dirección como hidden
             "cliente", "nombre", "telefono", "address", "latitude", "longitude", "label"
         ]
         widgets = {
-            "fecha": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "fecha": forms.DateTimeInput(attrs={
+                "class": "form-control",
+                "type": "datetime-local"
+            }),
             "estado": forms.Select(attrs={"class": "form-select"}),
-            "oferta": forms.TextInput(attrs={"class": "form-control"}),
             "recordatorio": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "numero_instalacion": forms.NumberInput(attrs={"class": "form-control"}),
+            "observaciones": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 4,
+                "placeholder": "Añade observaciones o notas adicionales..."
+            }),
         }
+
 
 class ClienteForm(forms.ModelForm):
     class Meta:

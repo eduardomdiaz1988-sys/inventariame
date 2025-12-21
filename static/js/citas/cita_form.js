@@ -1,124 +1,145 @@
-import { initClienteCreate } from "./cliente_create.js";
-import { cargarDirecciones } from "./direcciones.js";
-
 document.addEventListener("DOMContentLoaded", () => {
-  const clienteHidden = document.getElementById("id_cliente_hidden");
-  const cardCliente = document.getElementById("card-cliente");
-  const cardCita = document.getElementById("card-cita");
-  const cardResumen = document.getElementById("card-resumen");
-  const direccionSelect = document.getElementById("id_direccion");
+  console.log("¿JS cargado?");
 
-  const tipoRadios = document.querySelectorAll('input[name="cliente_tipo"]');
-  const busquedaCliente = document.getElementById("busquedaCliente");
-  const buscadorInput = document.getElementById("buscador_cliente");
-  const resultadosCliente = document.getElementById("resultados_cliente");
-
-  const clienteForm = document.getElementById("clienteForm");
-  const btnCrearCliente = document.getElementById("btnCrearCliente");
-  const formNuevoCliente = document.getElementById("formNuevoCliente");
-
-  // Calendario para fecha de cita
-  flatpickr("#id_fecha", {
-    enableTime: true,
-    dateFormat: "Y-m-d H:i",
-    time_24hr: true,
-    minDate: "today",
-    locale: "es"
-  });
-
-  // Mostrar/ocultar según tipo de cliente
-  tipoRadios.forEach(radio => {
-    radio.addEventListener("change", () => {
-      const tipo = radio.value;
-      busquedaCliente.classList.toggle("d-none", tipo !== "existente");
-      formNuevoCliente.classList.toggle("d-none", tipo !== "nuevo");
-      resultadosCliente.innerHTML = "";
-      clienteHidden.value = "";
-      cardCita.classList.add("d-none");
-      cardResumen.classList.add("d-none");
+  // ============================
+  //  FLATPICKR
+  // ============================
+  if (document.getElementById("id_fecha")) {
+    flatpickr("#id_fecha", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      time_24hr: true,
+      locale: flatpickr.l10ns.es
     });
-  });
+  }
 
-  // Búsqueda AJAX de cliente existente
-  buscadorInput.addEventListener("input", async (e) => {
-    const query = e.target.value;
-    if (query.length < 2) return;
+  // ============================
+  //  BUSCADOR DE OFERTAS
+  // ============================
+  const buscador = document.getElementById("buscador_oferta");
+  const resultados = document.getElementById("resultados_oferta");
+  const contenedor = document.getElementById("ofertas_seleccionadas");
+  const btnAgregar = document.getElementById("btnAgregarOferta");
 
-    try {
-      const response = await fetch(`/clientes/api/buscar/?q=${encodeURIComponent(query)}`);
-      const resultados = await response.json();
+  let ofertaSeleccionada = null;
 
-      resultadosCliente.innerHTML = "";
-      resultados.forEach(cliente => {
-        const item = document.createElement("button");
-        item.className = "list-group-item list-group-item-action";
-        item.textContent = `${cliente.nombre} (${cliente.telefono})`;
-        item.addEventListener("click", () => {
-          // Guardar cliente existente en hidden
-          clienteHidden.value = cliente.id;
-          clienteHidden.dataset.direccion = cliente.direccion || "";
-          clienteHidden.dataset.label = cliente.label || "";
+  if (buscador) {
+    buscador.addEventListener("input", async () => {
+      const q = buscador.value.trim();
+      if (q.length < 2) {
+        resultados.innerHTML = "";
+        ofertaSeleccionada = null;
+        return;
+      }
 
-          cargarDirecciones(cliente.id, direccionSelect);
-          cardCliente.classList.add("d-none");
-          cardCita.classList.remove("d-none");
+      try {
+        const response = await fetch(`/citas/buscar-ofertas/?q=${encodeURIComponent(q)}`);
+        const data = await response.json();
+
+        resultados.innerHTML = "";
+
+        data.forEach(oferta => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "list-group-item list-group-item-action";
+          item.textContent = `${oferta.nombre} (${oferta.valor} €)`;
+
+          item.addEventListener("click", () => {
+            buscador.value = oferta.nombre;
+            ofertaSeleccionada = oferta;
+            resultados.innerHTML = "";
+          });
+
+          resultados.appendChild(item);
         });
-        resultadosCliente.appendChild(item);
-      });
-    } catch (err) {
-      console.error("Error buscando cliente:", err);
+
+        if (data.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "list-group-item";
+          empty.textContent = "Sin resultados";
+          resultados.appendChild(empty);
+        }
+
+      } catch (err) {
+        console.error("Error buscando oferta:", err);
+      }
+    });
+  }
+
+  // ============================
+  //  AGREGAR OFERTA
+  // ============================
+  if (btnAgregar) {
+    btnAgregar.addEventListener("click", () => {
+      if (!ofertaSeleccionada) {
+        alert("Debes seleccionar una oferta primero.");
+        return;
+      }
+
+      // Si ya existe, aumentar cantidad
+      const existente = document.getElementById(`oferta_${ofertaSeleccionada.id}`);
+      if (existente) {
+        const cantidadInput = existente.querySelector("input[name='cantidad']");
+        cantidadInput.value = parseInt(cantidadInput.value) + 1;
+        return;
+      }
+
+      // Crear bloque
+      const div = document.createElement("div");
+      div.className = "input-group mb-2";
+      div.id = `oferta_${ofertaSeleccionada.id}`;
+
+      div.innerHTML = `
+        <span class="input-group-text">${ofertaSeleccionada.nombre}</span>
+        <input type="hidden" name="ofertas" value="${ofertaSeleccionada.id}">
+        <input type="number" name="cantidad" value="1" min="1" class="form-control" style="max-width:100px;">
+        <button type="button" class="btn btn-outline-danger">x</button>
+      `;
+
+      div.querySelector("button").addEventListener("click", () => div.remove());
+
+      contenedor.appendChild(div);
+
+      buscador.value = "";
+      ofertaSeleccionada = null;
+    });
+  }
+
+  // ============================
+  //  ELIMINAR OFERTAS PRECARGADAS
+  // ============================
+  document.querySelectorAll("#ofertas_seleccionadas .input-group").forEach(div => {
+    const btn = div.querySelector("button");
+    if (btn) {
+      btn.addEventListener("click", () => div.remove());
     }
   });
 
-  // Crear nuevo cliente (solo copia datos, no AJAX)
-  initClienteCreate(
-    btnCrearCliente,
-    clienteForm,
-    clienteHidden,
-    cardCliente,
-    cardCita
-  );
+  // ============================
+  //  DEBUG ANTES DE ENVIAR
+  // ============================
+  document.querySelector("form").addEventListener("submit", (e) => {
+    e.preventDefault(); // ⛔ Detenemos el envío para ver los datos
 
-  // Paso 3: Resumen
-  const btnResumen = document.getElementById("btnResumen");
-  if (btnResumen && cardResumen) {
-    btnResumen.addEventListener("click", () => {
-      // Validación mínima antes de avanzar
-      const nombre = document.getElementById("id_nombre_hidden").value.trim();
-      const fecha = document.getElementById("id_fecha").value;
+    console.log("🧪 DEBUG: Datos antes de enviar el formulario");
 
-      if (!nombre) {
-        alert("El nombre del cliente es obligatorio");
-        return;
-      }
-      if (!fecha) {
-        alert("La fecha de la cita es obligatoria");
-        return;
-      }
+    const formData = new FormData(e.target);
 
-      // Usar SIEMPRE los hidden para rellenar el resumen
-      const telefono = document.getElementById("id_telefono_hidden").value || "—";
-      const direccion = document.getElementById("id_address_hidden").value || "";
-      const label = document.getElementById("id_label_hidden").value || "";
+    const ofertas = formData.getAll("ofertas");
+    const cantidades = formData.getAll("cantidad");
 
-      document.getElementById("resCliente").textContent = nombre;
-      document.getElementById("resTelefono").textContent = telefono;
-      document.getElementById("resDireccion").textContent =
-        label ? `${label} — ${direccion}` : direccion || "—";
+    console.log("→ Ofertas:", ofertas);
+    console.log("→ Cantidades:", cantidades);
 
-      document.getElementById("resFecha").textContent = fecha;
-      document.getElementById("resOferta").textContent =
-        document.getElementById("id_oferta").value || "—";
+    // Mostrar todos los campos del formulario
+    for (const [key, value] of formData.entries()) {
+      console.log(`→ ${key}: ${value}`);
+    }
 
-      // NUEVO: número de instalación
-      const numeroInstalacionInput = document.getElementById("id_numero_instalacion");
-      if (numeroInstalacionInput) {
-        document.getElementById("resNumeroInstalacion").textContent =
-          numeroInstalacionInput.value || "0";
-      }
+    console.log("🧪 Fin del debug\n");
 
-      cardCita.classList.add("d-none");
-      cardResumen.classList.remove("d-none");
-    });
-  }
+    // Si quieres enviar el formulario después del debug:
+    e.target.submit();
+  });
+
 });

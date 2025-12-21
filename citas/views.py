@@ -3,14 +3,14 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from citas.forms import CitaWithClientForm
+from citas.forms import CitaForm, CitaWithClientForm
 from clientes.models import Cliente
 from locations.models import Address
-from .models import Cita
+from .models import Cita, CitaOferta
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from oferta.models import Oferta
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 
 
 def cita_cliente_detail(request, pk):
@@ -27,9 +27,11 @@ class CitaListView(LoginRequiredMixin, ListView):
     context_object_name = "object_list"
 
     def get_queryset(self):
-        # ✅ Solo citas del usuario autenticado
-        return Cita.objects.filter(usuario=self.request.user).select_related("cliente", "oferta")
-
+        return (
+            Cita.objects
+            .select_related("cliente", "usuario")
+            .prefetch_related("cita_ofertas__oferta")
+        )
 
 class CitaDetailView(LoginRequiredMixin, DetailView):
     model = Cita
@@ -39,7 +41,6 @@ class CitaDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         # ✅ Solo citas del usuario autenticado
         return Cita.objects.filter(usuario=self.request.user)
-
 
 class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
     model = Cita
@@ -94,6 +95,8 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
                 except Exception as e:
                     form.add_error(None, f"Error creando dirección: {e}")
                     return self.form_invalid(form)
+
+        # caso: cliente existente
         elif cliente_id:
             try:
                 cliente = Cliente.objects.get(pk=cliente_id)
@@ -109,8 +112,30 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
         form.instance.cliente = cliente
         form.instance.usuario = self.request.user
 
-        # ✅ observaciones ya se guarda automáticamente desde el formulario
-        return super().form_valid(form)
+        # Guardamos la cita primero
+        cita = form.save()
+
+        # ================================
+        #   PROCESAR OFERTAS MÚLTIPLES
+        # ================================
+        ofertas_ids = self.request.POST.getlist("ofertas[]")
+        cantidades = self.request.POST.getlist("cantidad[]")
+
+        for oferta_id, cantidad in zip(ofertas_ids, cantidades):
+            try:
+                oferta = Oferta.objects.get(pk=oferta_id)
+                cantidad_int = int(cantidad)
+
+                CitaOferta.objects.create(
+                    cita=cita,
+                    oferta=oferta,
+                    cantidad=cantidad_int
+                )
+            except Exception as e:
+                form.add_error(None, f"Error procesando oferta {oferta_id}: {e}")
+                return self.form_invalid(form)
+
+        return redirect(self.success_url)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -118,25 +143,80 @@ class CitaCreateWithClientView(LoginRequiredMixin, CreateView):
         return context
 
 
-
 class CitaCreateView(LoginRequiredMixin, CreateView):
     model = Cita
-    fields = ['cliente', 'fecha', 'recordatorio', 'oferta', 'estado']
+    form_class = CitaForm
     template_name = "citas/cita_form.html"
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Nueva Cita"}
 
     def form_valid(self, form):
-        form.instance.usuario = self.request.user
-        return super().form_valid(form)
+        # Guardar la cita
+        cita = form.save(commit=False)
+        cita.usuario = self.request.user
+        cita.save()
 
+        # Procesar ofertas múltiples
+        ofertas_ids = self.request.POST.getlist("ofertas")
+        cantidades = self.request.POST.getlist("cantidad")
 
+        for oferta_id, cantidad in zip(ofertas_ids, cantidades):
+            CitaOferta.objects.create(
+                cita=cita,
+                oferta_id=int(oferta_id),
+                cantidad=int(cantidad)
+            )
+
+        return redirect(self.success_url)
+    
 class CitaUpdateView(LoginRequiredMixin, UpdateView):
     model = Cita
-    fields = ['cliente', 'fecha', 'recordatorio', 'oferta', 'estado']
+    form_class = CitaForm
     template_name = "citas/cita_form.html"
     success_url = reverse_lazy('cita_list')
     extra_context = {"titulo": "Editar Cita"}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["ofertas_existentes"] = self.object.cita_ofertas.select_related("oferta").all()
+        return context
+    
+    def form_invalid(self, form):
+        print("\n❌ FORM INVALID ❌")
+        print(form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        form.instance.cliente = self.object.cliente
+        cita = form.save(commit=False)
+        cita.save()
+
+        # Leer listas correctamente
+        ofertas_ids = self.request.POST.getlist("ofertas")
+        cantidades = self.request.POST.getlist("cantidad")
+
+        print("\n========== DEBUG ==========")
+        print("POST:", dict(self.request.POST))
+        print("Ofertas:", ofertas_ids)
+        print("Cantidades:", cantidades)
+        print("===========================\n")
+
+        # Borrar ofertas anteriores
+        cita.cita_ofertas.all().delete()
+
+        # Crear nuevas
+        for oferta_id, cantidad in zip(ofertas_ids, cantidades):
+            print(f"Guardando oferta {oferta_id} x {cantidad}")
+            CitaOferta.objects.create(
+                cita=cita,
+                oferta_id=int(oferta_id),
+                cantidad=int(cantidad)
+            )
+
+        return redirect(self.success_url)
+
+
+
 
 
 class CitaDeleteView(LoginRequiredMixin, DeleteView):

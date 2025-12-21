@@ -5,7 +5,7 @@ from citas.models import Cita
 class CitaWithClientForm(forms.ModelForm):
     fecha = forms.DateTimeField(
         widget=forms.TextInput(attrs={
-            "id": "id_fecha",  # importante para flatpickr
+            "id": "id_fecha",
             "class": "form-control",
             "placeholder": "Selecciona fecha y hora"
         }),
@@ -14,12 +14,12 @@ class CitaWithClientForm(forms.ModelForm):
 
     class Meta:
         model = Cita
-        # ✅ añadimos observaciones
-        fields = ["fecha", "oferta", "numero_instalacion", "observaciones"]
+        fields = ["fecha", "numero_instalacion", "observaciones"]  # ❌ oferta eliminada
         widgets = {
-            "cliente": forms.HiddenInput(),
-            "oferta": forms.Select(attrs={"class": "form-control", "id": "id_oferta"}),
-            "numero_instalacion": forms.NumberInput(attrs={"class": "form-control", "id": "id_numero_instalacion"}),
+            "numero_instalacion": forms.NumberInput(attrs={
+                "class": "form-control",
+                "id": "id_numero_instalacion"
+            }),
             "observaciones": forms.Textarea(attrs={
                 "class": "form-control",
                 "id": "id_observaciones",
@@ -27,7 +27,6 @@ class CitaWithClientForm(forms.ModelForm):
                 "placeholder": "Añade observaciones o notas adicionales..."
             }),
         }
-
 
 class CitaForm(forms.ModelForm):
     fecha = forms.DateTimeField(
@@ -41,12 +40,31 @@ class CitaForm(forms.ModelForm):
 
     class Meta:
         model = Cita
-        # ✅ añadimos observaciones también aquí
-        fields = ["cliente", "fecha", "oferta", "numero_instalacion", "observaciones"]
+        fields = [
+            "cliente",
+            "fecha",
+            "estado",           # ✅ Añadido
+            "recordatorio",     # ✅ Añadido
+            "numero_instalacion",
+            "observaciones"
+        ]
         widgets = {
-            "cliente": forms.Select(attrs={"class": "form-control", "id": "id_cliente"}),
-            "oferta": forms.Select(attrs={"class": "form-control", "id": "id_oferta"}),
-            "numero_instalacion": forms.NumberInput(attrs={"class": "form-control", "id": "id_numero_instalacion"}),
+            "cliente": forms.Select(attrs={
+                "class": "form-control",
+                "id": "id_cliente"
+            }),
+            "estado": forms.Select(attrs={
+                "class": "form-select",
+                "id": "id_estado"
+            }),
+            "recordatorio": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+                "id": "id_recordatorio"
+            }),
+            "numero_instalacion": forms.NumberInput(attrs={
+                "class": "form-control",
+                "id": "id_numero_instalacion"
+            }),
             "observaciones": forms.Textarea(attrs={
                 "class": "form-control",
                 "id": "id_observaciones",

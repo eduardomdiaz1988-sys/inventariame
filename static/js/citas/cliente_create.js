@@ -1,6 +1,6 @@
+// cliente_create.js
 export function initClienteCreate(
   btnCrearCliente,
-  clienteForm,
   clienteHidden,
   cardCliente,
   cardCita
@@ -8,7 +8,7 @@ export function initClienteCreate(
   if (!btnCrearCliente) return;
 
   btnCrearCliente.addEventListener("click", () => {
-    // Recoger valores del formulario parcial
+
     const nombre = document.getElementById("id_nombre")?.value.trim() || "";
     const telefono = document.getElementById("id_telefono")?.value.trim() || "";
     const address = document.getElementById("addressField")?.value || "";
@@ -16,7 +16,6 @@ export function initClienteCreate(
     const lng = document.getElementById("lngField")?.value || "";
     const label = document.getElementById("labelField")?.value || "";
 
-    // Validación mínima: nombre obligatorio
     if (!nombre) {
       alert("El nombre del cliente es obligatorio");
       return;
@@ -29,12 +28,6 @@ export function initClienteCreate(
     document.getElementById("id_lat_hidden").value = lat;
     document.getElementById("id_lng_hidden").value = lng;
     document.getElementById("id_label_hidden").value = label;
-
-    // Guardar también en dataset para el resumen
-    if (clienteHidden) {
-      clienteHidden.dataset.direccion = address;
-      clienteHidden.dataset.label = label;
-    }
 
     // Avanzar al paso de cita
     cardCliente.classList.add("d-none");
