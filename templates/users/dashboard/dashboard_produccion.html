@@ -1,6 +1,6 @@
 <div class="card shadow-sm border-0 mt-3">
   <div class="card-header">
-    <h5 class="mb-0">Producción mensual</h5>
+    <h5 class="mb-0">Mantenimientos {{mes_y_anio}}</h5>
   </div>
   <div class="card-body">
     {% if mensaje_motivador %}
@@ -8,7 +8,7 @@
       {{ mensaje_motivador }}
     </div>
     {% endif %}
-    <p><strong>Meta ajustada:</strong> {{ meta_mensual }} mantenimientos</p>
+    <p><strong>Meta :</strong> {{ meta_mensual }} mantenimientos</p>
     <p><strong>Producción actual:</strong> {{ produccion_total }}</p>
     <p><strong>Cumplimiento:</strong> {{ cumplimiento }}%</p>
     <div class="progress mb-2">
@@ -23,7 +23,7 @@
     </div>
     {% if cumplimiento >= 100 %}
     <div class="alert alert-warning mt-2">
-      🏅 ¡Has superado tu meta mensual! ¡Enhorabuena!
+      🏅 ¡Has llegado a producción! ¡Enhorabuena!
     </div>
     {% endif %}
   </div>

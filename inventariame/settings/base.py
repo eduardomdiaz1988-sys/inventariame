@@ -51,6 +51,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "users.context_processors.alertas_processor",
                 "inventariame.context_processors.fecha_hoy",
+                "inventariame.context_processors.mes_y_anio",
 
             ],
         },
