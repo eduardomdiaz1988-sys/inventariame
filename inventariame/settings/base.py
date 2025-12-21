@@ -50,6 +50,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "users.context_processors.alertas_processor",
+                "inventariame.context_processors.fecha_hoy",
+
             ],
         },
     },
