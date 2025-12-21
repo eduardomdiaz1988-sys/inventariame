@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import home_view, perfil_editar, registro_basic_view, registro_view, buscar_view, logout_view, verificar_usuario, perfil_view
-
+from django.contrib.auth import views as auth_views
 app_name = "users"
 
 urlpatterns = [
@@ -14,4 +14,12 @@ urlpatterns = [
     path("perfil/", perfil_view, name="perfil"),  
     path("perfil/editar/", perfil_editar, name="perfil_editar"),
     path("registro-basico/", registro_basic_view, name="registro_basico"),
+    path("perfil/cambiar-password/", 
+     auth_views.PasswordChangeView.as_view(
+         template_name="users/cambiar_password.html",
+         success_url="/users/perfil/"
+     ),
+     name="cambiar_password"),
 ]
+
+

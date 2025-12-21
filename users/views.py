@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 import calendar
-from .forms import PerfilForm, RegistroForm
+from .forms import PerfilForm, RegistroForm, UserForm
 from clientes.models import Cliente
 from citas.models import Cita
 from inventory.models import Elemento, Cantidad
@@ -121,20 +121,29 @@ def perfil_view(request):
     return render(request, "users/perfil.html", {"perfil": perfil})
 
 
+
 @login_required
 def perfil_editar(request):
-    perfil = request.user.perfil  # gracias al related_name="perfil"
+    usuario = request.user
+    perfil = usuario.perfil  # gracias al related_name="perfil"
 
     if request.method == "POST":
-        form = PerfilForm(request.POST, instance=perfil)
-        if form.is_valid():
-            form.save()
+        user_form = UserForm(request.POST, instance=usuario)
+        perfil_form = PerfilForm(request.POST, instance=perfil)
+
+        if user_form.is_valid() and perfil_form.is_valid():
+            user_form.save()
+            perfil_form.save()
             messages.success(request, "Perfil actualizado correctamente.")
             return redirect("users:perfil")
     else:
-        form = PerfilForm(instance=perfil)
+        user_form = UserForm(instance=usuario)
+        perfil_form = PerfilForm(instance=perfil)
 
-    return render(request, "users/perfil_editar.html", {"form": form})
+    return render(request, "users/perfil_editar.html", {
+        "user_form": user_form,
+        "perfil_form": perfil_form,
+    })
 
 
 def registro_view(request):
