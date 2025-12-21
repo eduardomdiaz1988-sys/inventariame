@@ -1,33 +1,71 @@
 {% extends "base.html" %}
 {% block content_authenticated %}
 
-<h2>Referencias</h2>
-<a href="{% url 'referencia_nuevo' %}" class="btn btn-success mb-3">Nueva referencia</a>
+<div class="container mt-4">
+  <h2>Listado de Referencias</h2>
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Nombre</th>
-      <th>Tipo</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for ref in referencias %}
-    <tr>
-      <td>{{ ref.nombre }}</td>
-      <td>{{ ref.tipo.nombre }}</td>
-      <td>
-        <a href="{% url 'referencia_editar' ref.pk %}" class="btn btn-primary btn-sm">Editar</a>
-        <a href="{% url 'referencia_eliminar' ref.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
-      </td>
-    </tr>
-    {% empty %}
-    <tr>
-      <td colspan="5">No hay referencias registradas.</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <!-- Filtros -->
+  <form method="get" class="card p-3 mb-4 shadow-sm form-card-bg">
+    <div class="row g-3">
+
+      <!-- Nombre -->
+      <div class="col-md-4">
+        <input type="text" name="nombre" class="form-control" placeholder="Nombre"
+               value="{{ request.GET.nombre }}">
+      </div>
+
+      <!-- Tipo -->
+      <div class="col-md-4">
+        <select name="tipo" class="form-select">
+          <option value="">Todos los tipos</option>
+          {% for t in tipos %}
+            <option value="{{ t.id }}" {% if request.GET.tipo == t.id|stringformat:"s" %}selected{% endif %}>
+              {{ t.nombre }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Botón filtrar -->
+      <div class="col-md-4 d-flex align-items-center">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+      </div>
+
+    </div>
+
+    <div class="mt-3 d-flex justify-content-between">
+      <a href="{% url 'referencia_list' %}" class="btn btn-outline-secondary">Limpiar</a>
+      <a href="{% url 'referencia_nuevo' %}" class="btn btn-success">Nueva referencia</a>
+    </div>
+  </form>
+
+  <!-- Tabla -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ref in referencias %}
+      <tr>
+        <td>{{ ref.nombre }}</td>
+        <td>{{ ref.tipo.nombre }}</td>
+        <td>
+          <a href="{% url 'referencia_editar' ref.pk %}" class="btn btn-primary btn-sm">Editar</a>
+          <a href="{% url 'referencia_eliminar' ref.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="3">No hay referencias registradas.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
 
 {% endblock %}

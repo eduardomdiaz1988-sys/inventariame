@@ -1,6 +1,18 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
+from django import forms
+from .models import  PerfilUsuario
+
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = PerfilUsuario
+        fields = ["matricula", "nombre_grupo", "tipo_usuario"]
+        widgets = {
+            "matricula": forms.TextInput(attrs={"class": "form-control"}),
+            "nombre_grupo": forms.TextInput(attrs={"class": "form-control"}),
+            "tipo_usuario": forms.Select(attrs={"class": "form-select"}),
+        }
 
 class RegistroBasicoForm(UserCreationForm):
     matricula = forms.CharField(max_length=20, required=True)

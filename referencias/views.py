@@ -36,7 +36,24 @@ def tipo_eliminar(request, pk):
 @login_required
 def referencia_list(request):
     referencias = Referencia.objects.select_related("tipo").all()
-    return render(request, "referencias/referencia_list.html", {"referencias": referencias})
+    tipos = Tipo.objects.all()  # Para el select del filtro
+
+    # Filtros
+    nombre = request.GET.get("nombre", "")
+    tipo = request.GET.get("tipo", "")
+
+    if nombre:
+        referencias = referencias.filter(nombre__icontains=nombre)
+
+    if tipo:
+        referencias = referencias.filter(tipo_id=tipo)
+
+    context = {
+        "referencias": referencias,
+        "tipos": tipos,
+    }
+
+    return render(request, "referencias/referencia_list.html", context)
 
 @login_required
 def referencia_nuevo(request):

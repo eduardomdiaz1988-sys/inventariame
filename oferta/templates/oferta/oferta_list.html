@@ -4,7 +4,8 @@
   <h2>Listado de Ofertas</h2>
 
   <!-- Filtros -->
-  <form method="get" class="card p-3 mb-4 shadow-sm">
+  <form method="get" class="card p-3 mb-4 shadow-sm form-card-bg">
+      
     <div class="row g-3">
       <div class="col-md-3">
         <input type="text" name="nombre" class="form-control" placeholder="Nombre" value="{{ request.GET.nombre }}">
@@ -33,7 +34,9 @@
     </div>
     <div class="mt-3 d-flex justify-content-between">
       <button type="submit" class="btn btn-primary">Filtrar</button>
+      
       <a href="{% url 'oferta_list' %}" class="btn btn-outline-secondary">Limpiar</a>
+      <a href="{% url 'oferta_nueva' %}" class="btn btn-success">Nueva oferta</a>
     </div>
   </form>
 
@@ -72,6 +75,6 @@
     </tbody>
   </table>
 
-  <a href="{% url 'oferta_nueva' %}" class="btn btn-success">Nueva oferta</a>
+
 </div>
 {% endblock %}

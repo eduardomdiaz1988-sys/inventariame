@@ -25,13 +25,13 @@
         {% endfor %}
         <div class="d-flex justify-content-end gap-2 mt-3">
           <button class="btn btn-danger" type="submit">Registrarse</button>
-          <a href="{% url 'login' %}" class="btn btn-secondary">Cancelar</a>
+          <a href="{% url 'users:login' %}" class="btn btn-secondary">Cancelar</a>
         </div>
       </form>
 
       <div class="text-center mt-3">
         <small class="text-muted">¿Ya tienes cuenta?</small><br>
-        <a href="{% url 'login' %}" class="btn btn-outline-danger btn-sm mt-2">Inicia sesión aquí</a>
+        <a href="{% url 'users:login' %}" class="btn btn-outline-danger btn-sm mt-2">Inicia sesión aquí</a>
       </div>
     </div>
   </div>

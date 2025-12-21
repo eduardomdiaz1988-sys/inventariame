@@ -1,5 +1,5 @@
 {% extends "base.html" %}
 {% block content_guest %}
 <h2>Has cerrado sesión</h2>
-<a href="{% url 'login' %}" class="btn btn-danger">Volver a entrar</a>
+<a href="{% url 'users:login' %}" class="btn btn-danger">Volver a entrar</a>
 {% endblock %}

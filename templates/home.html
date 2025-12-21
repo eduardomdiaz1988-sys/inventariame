@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Inventariame — Funcionalidades{% endblock %}
+
+{% block content_authenticated %}
+<div class="container py-4">
+
+  <!-- Encabezado -->
+  <div class="mb-4">
+    <h1 class="fw-bold text-danger">Bienvenido a Inventariame</h1>
+    <p class="text-muted">Tu plataforma integral para gestionar clientes, citas, inventario, producción y más.</p>
+  </div>
+
+  <!-- Tarjetas de funcionalidades -->
+  <div class="row g-4">
+
+    <!-- Agenda -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-calendar-check text-danger me-2"></i>Agenda</h5>
+          <p class="card-text">
+            Gestiona tus citas de forma rápida y visual. Crea nuevas citas, asigna clientes, selecciona ofertas y consulta el historial.
+          </p>
+          <a href="{% url 'cita_list' %}" class="btn btn-danger btn-sm">Ir a Agenda</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clientes -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-people text-danger me-2"></i>Clientes</h5>
+          <p class="card-text">
+            Administra tu cartera de clientes. Registra nuevos clientes, gestiona direcciones y consulta su historial de citas.
+          </p>
+          <a href="{% url 'cliente_list' %}" class="btn btn-danger btn-sm">Ver Clientes</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Producción -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-hammer text-danger me-2"></i>Producción</h5>
+          <p class="card-text">
+            Controla el flujo de trabajo de tus instalaciones o servicios. Registra avances, estados y tiempos de producción.
+          </p>
+          <a href="{% url 'users:dashboard' %}" class="btn btn-danger btn-sm">Ver Producción</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventario -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-box-seam text-danger me-2"></i>Inventario</h5>
+          <p class="card-text">
+            Gestiona tus elementos, cantidades y movimientos. Controla existencias, entradas, salidas y asignaciones.
+          </p>
+          <a href="{% url 'stock_list' %}" class="btn btn-danger btn-sm">Ver Inventario</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ofertas -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-tags text-danger me-2"></i>Ofertas</h5>
+          <p class="card-text">
+            Crea y administra tus ofertas comerciales. Asócialas a citas y controla cantidades y precios.
+          </p>
+          <a href="{% url 'oferta_list' %}" class="btn btn-danger btn-sm">Ver Ofertas</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Referencias -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-journal-text text-danger me-2"></i>Referencias</h5>
+          <p class="card-text">
+            Administra referencias técnicas o comerciales que sirven como base para tus productos o servicios.
+          </p>
+          <a href="{% url 'referencia_list' %}" class="btn btn-danger btn-sm">Ver Referencias</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mantenimientos -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-tools text-danger me-2"></i>Mantenimientos</h5>
+          <p class="card-text">
+            Registra y gestiona mantenimientos programados o correctivos para tus instalaciones o equipos.
+          </p>
+          <a href="{% url 'mantenimiento_list' %}" class="btn btn-danger btn-sm">Ver Mantenimientos</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Perfil -->
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-person-circle text-danger me-2"></i>Perfil</h5>
+          <p class="card-text">
+            Consulta y edita tu información personal, cambia tu contraseña y gestiona tus preferencias.
+          </p>
+          <a href="{% url 'users:perfil' %}" class="btn btn-danger btn-sm">Mi Perfil</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

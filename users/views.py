@@ -6,16 +6,18 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 import calendar
-
-from .forms import RegistroForm
+from .forms import PerfilForm, RegistroForm
 from clientes.models import Cliente
 from citas.models import Cita
 from inventory.models import Elemento, Cantidad
 from sales.models import Venta
-from mantenimientos.models import Mantenimiento, ConfiguracionMantenimientos, Produccion
-from utils.ganancia import calcular_ganancia, calcular_ganancia_total
-
+from mantenimientos.models import Mantenimiento, ConfiguracionMantenimientos
+from utils.ganancia import calcular_ganancia_total
 from .forms import RegistroBasicoForm  # asegúrate de tener este formulario definido
+from django.contrib import messages
+from .forms import PerfilForm
+from .models import PerfilUsuario
+
 
 def registro_basic_view(request):
     if request.method == "POST":
@@ -117,6 +119,22 @@ def home_view(request):
 def perfil_view(request):
     perfil = request.user.perfil  # OneToOneField con related_name="perfil"
     return render(request, "users/perfil.html", {"perfil": perfil})
+
+
+@login_required
+def perfil_editar(request):
+    perfil = request.user.perfil  # gracias al related_name="perfil"
+
+    if request.method == "POST":
+        form = PerfilForm(request.POST, instance=perfil)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Perfil actualizado correctamente.")
+            return redirect("users:perfil")
+    else:
+        form = PerfilForm(instance=perfil)
+
+    return render(request, "users/perfil_editar.html", {"form": form})
 
 
 def registro_view(request):
