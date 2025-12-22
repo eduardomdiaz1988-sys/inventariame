@@ -32,7 +32,7 @@ def buscar_ofertas(request):
     data = []
     for o in ofertas:
         tipo = o.referencia.tipo.nombre
-        display = f"{o.nombre} ({tipo}) - {o.referencia.nombre} - 0 + {o.valor}"
+        display = f"{o.nombre} - {o.referencia.nombre} - 0 + {o.valor}"
 
         data.append({
             "id": o.id,
