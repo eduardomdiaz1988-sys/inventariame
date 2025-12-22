@@ -35,7 +35,7 @@
       {% endif %}"
       onclick="window.location.href='{% url 'cita_detail' obj.pk %}'">
       <td>{{ obj.cliente }}</td>
-      <td>{{ obj.fecha|localtime|date:"Y-m-d H:i" }}</td>
+      <td>{{ obj.fecha|localtime|date:"d-F-Y H:i" }}</td>
       <td>{{ obj.recordatorio|yesno:"Sí,No" }}</td>
       <td>
         {% if obj.cita_ofertas.all %}
