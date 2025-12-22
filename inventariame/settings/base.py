@@ -68,9 +68,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "es"
-TIME_ZONE = "UTC"
-USE_I18N = True
 USE_TZ = True
+TIME_ZONE = "Europe/Madrid"
+USE_I18N = True
+
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
