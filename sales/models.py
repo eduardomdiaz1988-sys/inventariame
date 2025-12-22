@@ -9,6 +9,7 @@ class Venta(models.Model):
     # ✅ ahora una venta puede tener varias ofertas con cantidades
     ofertas = models.ManyToManyField(Oferta, through="VentaOferta", related_name="ventas")
     mantenimiento_numero = models.IntegerField(null=True, blank=True, help_text="Número de mantenimiento asociado (opcional)")
+    instalacion_numero = models.IntegerField(null=True, blank=True, help_text="Número de instalacion asociado (opcional)")
     ppa = models.BooleanField(default=False, help_text="Marcar si la venta ha convertido PPA")
 
     def __str__(self):

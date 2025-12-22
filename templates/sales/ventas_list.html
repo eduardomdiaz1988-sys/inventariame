@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content_authenticated %}
+
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h2 class="mb-0">Ventas</h2>
   <a class="btn btn-danger" href="{% url 'venta_create' %}">
@@ -13,6 +14,7 @@
       <thead class="table-light">
         <tr>
           <th>Ofertas</th>
+          <th>Nº Instalación</th>
           <th>Nº Mantenimiento</th>
           <th>Fecha</th>
           <th class="text-end">Acciones</th>
@@ -21,20 +23,28 @@
       <tbody>
         {% for obj in object_list %}
         <tr>
+
           <!-- Ofertas asociadas -->
           <td>
-            {% if obj.venta_ofertas.all %}
-              {% for vo in obj.venta_ofertas.all %}
-                <span class="badge bg-primary me-1">
-                  {{ vo.oferta.nombre }} x{{ vo.cantidad }}
-                </span>
-              {% endfor %}
-            {% else %}
+            {% for vo in obj.venta_ofertas.all %}
+              <span class="badge bg-primary me-1">
+                {{ vo.oferta.nombre }} ({{ vo.oferta.referencia.tipo.nombre }}) x{{ vo.cantidad }}
+              </span>
+            {% empty %}
               <span class="text-muted">Sin ofertas</span>
+            {% endfor %}
+          </td>
+
+          <!-- Nº Instalación -->
+          <td>
+            {% if obj.instalacion_numero %}
+              {{ obj.instalacion_numero }}
+            {% else %}
+              <span class="text-muted">—</span>
             {% endif %}
           </td>
 
-          <!-- Nº mantenimiento -->
+          <!-- Nº Mantenimiento -->
           <td>
             {% if obj.mantenimiento_numero %}
               {{ obj.mantenimiento_numero }}
@@ -58,14 +68,16 @@
               <i class="bi bi-trash"></i> Eliminar
             </a>
           </td>
+
         </tr>
         {% empty %}
         <tr>
-          <td colspan="4" class="text-center text-muted py-3">No hay ventas registradas</td>
+          <td colspan="5" class="text-center text-muted py-3">No hay ventas registradas</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+
 {% endblock %}

@@ -1,13 +1,13 @@
 from django.shortcuts import redirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
+from django.utils import timezone
 
 from oferta.models import Oferta
 from .models import Venta, VentaOferta
 from users.mixins import GroupVisibilityMixin, SameOwnerRequiredMixin
-from django.utils import timezone
-from mantenimientos.models import Produccion 
-from utils.ganancia import calcular_ganancia  # ✅ función común
+from mantenimientos.models import Produccion
+from utils.ganancia import calcular_ganancia
 
 
 class VentaListView(GroupVisibilityMixin, ListView):
@@ -17,7 +17,7 @@ class VentaListView(GroupVisibilityMixin, ListView):
 
 class VentaCreateView(GroupVisibilityMixin, CreateView):
     model = Venta
-    fields = ['mantenimiento_numero', 'ppa']   # ✅ ya no incluimos 'oferta' directamente
+    fields = ['instalacion_numero', 'mantenimiento_numero', 'ppa']   # 👈 NUEVO CAMPO
     template_name = "sales/form.html"
     success_url = reverse_lazy('venta_list')
     extra_context = {"titulo": "Nueva Venta"}
@@ -26,38 +26,39 @@ class VentaCreateView(GroupVisibilityMixin, CreateView):
         form.instance.usuario = self.request.user
         venta = form.save()
 
-        # --- Procesar las ofertas seleccionadas desde el formulario ---
+        # --- Procesar ofertas seleccionadas ---
         ofertas_ids = self.request.POST.getlist("ofertas[]")
         cantidades = self.request.POST.getlist("cantidad[]")
 
-        total_valor = 0
+        ganancia_total = 0
+
         for oferta_id, cantidad in zip(ofertas_ids, cantidades):
             try:
                 oferta = Oferta.objects.get(pk=oferta_id)
                 cantidad_int = int(cantidad)
-                # Crear relación en VentaOferta
+
                 VentaOferta.objects.create(
                     venta=venta,
                     oferta=oferta,
                     cantidad=cantidad_int
                 )
-                total_valor += oferta.valor * cantidad_int
+
+                # Ganancia por unidad * cantidad
+                ganancia_total += calcular_ganancia(oferta.valor) * cantidad_int
+
             except Exception as e:
                 print(f"Error procesando oferta {oferta_id}: {e}")
 
-        # --- Calcular ganancia usando la función común ---
-        ganancia = calcular_ganancia(total_valor)
-
-        # --- Actualizar/crear Producción mensual ---
+        # --- Actualizar Producción mensual ---
         hoy = timezone.now().date()
         obj, created = Produccion.objects.get_or_create(
             usuario=self.request.user,
             año=hoy.year,
             mes=hoy.month,
-            defaults={"ganancia_total": ganancia}
+            defaults={"ganancia_total": ganancia_total}
         )
         if not created:
-            obj.ganancia_total += ganancia
+            obj.ganancia_total += ganancia_total
             obj.save()
 
         return redirect(self.success_url)
@@ -65,7 +66,7 @@ class VentaCreateView(GroupVisibilityMixin, CreateView):
 
 class VentaUpdateView(SameOwnerRequiredMixin, UpdateView):
     model = Venta
-    fields = ['mantenimiento_numero', 'ppa']
+    fields = ['instalacion_numero', 'mantenimiento_numero', 'ppa']  # 👈 NUEVO CAMPO
     template_name = "sales/form.html"
     success_url = reverse_lazy('venta_list')
 
@@ -78,41 +79,45 @@ class VentaUpdateView(SameOwnerRequiredMixin, UpdateView):
     def form_valid(self, form):
         venta = form.save()
 
-        # --- Limpiar ofertas anteriores ---
+        # --- Eliminar ofertas anteriores ---
         venta.venta_ofertas.all().delete()
 
         # --- Procesar nuevas ofertas ---
         ofertas_ids = self.request.POST.getlist("ofertas[]")
         cantidades = self.request.POST.getlist("cantidad[]")
 
-        total_valor = 0
+        ganancia_total = 0
+
         for oferta_id, cantidad in zip(ofertas_ids, cantidades):
             try:
                 oferta = Oferta.objects.get(pk=oferta_id)
                 cantidad_int = int(cantidad)
+
                 VentaOferta.objects.create(
                     venta=venta,
                     oferta=oferta,
                     cantidad=cantidad_int
                 )
-                total_valor += oferta.valor * cantidad_int
+
+                ganancia_total += calcular_ganancia(oferta.valor) * cantidad_int
+
             except Exception as e:
                 print(f"Error procesando oferta {oferta_id}: {e}")
 
-        # --- Recalcular ganancia ---
-        ganancia = calcular_ganancia(total_valor)
+        # --- Actualizar Producción mensual ---
         hoy = timezone.now().date()
         obj, created = Produccion.objects.get_or_create(
             usuario=self.request.user,
             año=hoy.year,
             mes=hoy.month,
-            defaults={"ganancia_total": ganancia}
+            defaults={"ganancia_total": ganancia_total}
         )
         if not created:
-            obj.ganancia_total += ganancia
+            obj.ganancia_total += ganancia_total
             obj.save()
 
         return redirect(self.success_url)
+
 
 class VentaDeleteView(SameOwnerRequiredMixin, DeleteView):
     model = Venta

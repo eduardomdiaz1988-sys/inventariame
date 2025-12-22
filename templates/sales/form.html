@@ -13,44 +13,61 @@
     <div class="card-header bg-primary text-white">
       <strong>Seleccionar Ofertas</strong>
     </div>
+
     <div class="card-body">
-      <label for="buscador_oferta" class="form-label">Buscar oferta por nombre</label>
+
+      <label for="buscador_oferta" class="form-label">Buscar oferta</label>
+
       <div class="input-group mb-3">
-        <input type="text" id="buscador_oferta" class="form-control" placeholder="Ej. Sentinel">
+        <input type="text" id="buscador_oferta" class="form-control" placeholder="Ej. EM2HX5M, Cerradura…">
         <button type="button" id="btnAgregarOferta" class="btn btn-outline-success">+</button>
       </div>
+
       <div id="resultados_oferta" class="list-group mt-2"></div>
-      <!-- Listado dinámico de ofertas seleccionadas -->
+
       <div id="ofertas_seleccionadas" class="mt-3">
         {% for vo in ofertas_existentes %}
         <div class="input-group mb-2" id="oferta_{{ vo.oferta.id }}">
-          <span class="input-group-text">{{ vo.oferta.nombre }}</span>
+          <span class="input-group-text">
+            {{ vo.oferta.nombre }} ({{ vo.oferta.referencia.tipo.nombre }})
+          </span>
           <input type="hidden" name="ofertas[]" value="{{ vo.oferta.id }}">
-          <input type="number" name="cantidad[]" value="{{ vo.cantidad }}" min="1" class="form-control" style="max-width:100px;">
+          <input type="number" name="cantidad[]" value="{{ vo.cantidad }}" min="1"
+                 class="form-control" style="max-width:100px;">
           <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">x</button>
         </div>
         {% endfor %}
       </div>
+
     </div>
   </div>
 
-  <!-- Bloque: Mantenimiento + PPA -->
+  <!-- Bloque: Instalación + Mantenimiento + PPA -->
   <div class="card mb-4">
     <div class="card-header bg-secondary text-white">
       <strong>Detalles adicionales</strong>
     </div>
+
     <div class="card-body">
       <div class="row g-3">
-        <div class="col-12 col-md-6">
-          {{ form.mantenimiento_numero.label_tag }}
+
+        <div class="col-12 col-md-4">
+          Instalación
+          {{ form.instalacion_numero|add_class:"form-control" }}
+        </div>
+
+        <div class="col-12 col-md-4">
+          Mantenimiento
           {{ form.mantenimiento_numero|add_class:"form-control" }}
         </div>
-        <div class="col-12 col-md-6 d-flex align-items-center">
+
+        <div class="col-12 col-md-4 d-flex align-items-center">
           <div class="form-check mt-2">
             {{ form.ppa }}
             {{ form.ppa.label_tag }}
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -64,6 +81,7 @@
       <i class="bi bi-x-circle"></i> Cancelar
     </a>
   </div>
+
 </form>
 
 {% endblock %}
@@ -78,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let ofertaSeleccionada = null;
 
-  // Buscar ofertas por AJAX
   buscador.addEventListener("input", async (e) => {
     const query = e.target.value;
     if (query.length < 2) {
@@ -92,62 +109,63 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
 
       resultados.innerHTML = "";
+
       data.forEach(oferta => {
         const item = document.createElement("button");
         item.type = "button";
         item.className = "list-group-item list-group-item-action";
-        item.textContent = oferta.nombre;
+
+        item.innerHTML = `
+          <strong>${oferta.nombre}</strong><br>
+          <small class="text-muted">${oferta.tipo}</small>
+        `;
+
         item.addEventListener("click", () => {
           buscador.value = oferta.nombre;
           ofertaSeleccionada = oferta;
           resultados.innerHTML = "";
         });
+
         resultados.appendChild(item);
       });
 
       if (data.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "list-group-item";
-        empty.textContent = "Sin resultados";
-        resultados.appendChild(empty);
+        resultados.innerHTML = `<div class="list-group-item">Sin resultados</div>`;
       }
+
     } catch (err) {
       console.error("Error buscando oferta:", err);
     }
   });
 
-  // Agregar oferta seleccionada al listado
   btnAgregar.addEventListener("click", () => {
     if (!ofertaSeleccionada) {
       alert("Debes seleccionar una oferta primero.");
       return;
     }
 
-    // Verificar si ya existe en el listado
     const existente = document.querySelector(`#oferta_${ofertaSeleccionada.id}`);
     if (existente) {
-      // Si ya existe, incrementamos cantidad
       const cantidadInput = existente.querySelector("input[name='cantidad[]']");
       cantidadInput.value = parseInt(cantidadInput.value) + 1;
       return;
     }
 
-    // Crear bloque de oferta seleccionada
     const div = document.createElement("div");
     div.className = "input-group mb-2";
     div.id = `oferta_${ofertaSeleccionada.id}`;
 
     div.innerHTML = `
-      <span class="input-group-text">${ofertaSeleccionada.nombre}</span>
+      <span class="input-group-text">
+        ${ofertaSeleccionada.nombre}
+        <small class="text-muted ms-2">(${ofertaSeleccionada.tipo})</small>
+      </span>
       <input type="hidden" name="ofertas[]" value="${ofertaSeleccionada.id}">
       <input type="number" name="cantidad[]" value="1" min="1" class="form-control" style="max-width:100px;">
       <button type="button" class="btn btn-outline-danger">x</button>
     `;
 
-    // Botón eliminar
-    div.querySelector("button").addEventListener("click", () => {
-      div.remove();
-    });
+    div.querySelector("button").addEventListener("click", () => div.remove());
 
     contenedor.appendChild(div);
     buscador.value = "";
