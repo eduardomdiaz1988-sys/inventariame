@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.contrib.auth.decorators import login_required
 from oferta.models import Oferta
+from django.db import models
 
 @require_GET
 @login_required
@@ -21,17 +22,26 @@ def buscar_ofertas(request):
     if not q:
         return JsonResponse([], safe=False)
 
-    # Filtramos por nombre de oferta
-    ofertas = Oferta.objects.filter(nombre__icontains=q).select_related("referencia")[:20]
+    # Filtrar por nombre de oferta, referencia o tipo
+    ofertas = Oferta.objects.filter(
+        models.Q(nombre__icontains=q) |
+        models.Q(referencia__nombre__icontains=q) |
+        models.Q(referencia__tipo__nombre__icontains=q)
+    ).select_related("referencia", "referencia__tipo")[:20]
 
     data = []
     for o in ofertas:
-        # ✅ Composición: nombre de la oferta + nombre de la referencia + valor
-        display = f"{o.nombre} - {o.referencia.nombre} - 0 + {o.valor}"
-        data.append({"id": o.id, "nombre": display})
+        tipo = o.referencia.tipo.nombre
+        display = f"{o.nombre} ({tipo}) - {o.referencia.nombre} - 0 + {o.valor}"
+
+        data.append({
+            "id": o.id,
+            "nombre": display,
+            "tipo": tipo,
+            "valor": o.valor
+        })
 
     return JsonResponse(data, safe=False)
-
 
 @login_required
 def oferta_list(request):
